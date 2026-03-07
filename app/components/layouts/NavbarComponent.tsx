@@ -13,13 +13,13 @@ export default function NavbarComponent() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-40 bg-white">
       {/* Container Utama Navbar */}
-      <div className="nav-shadow px-4 md:px-10 py-4 flex items-center justify-between min-h-[80px]">
+      <div className="nav-shadow px-4 md:px-24 py-4 flex items-center justify-between min-h-[80px]">
         
         {/* KIRI: Logo & Search Bar */}
         <div className="flex items-center gap-10 flex-1">
           <Link href="/">
             <Image 
-              src="/logo-vokapedia.png" 
+              src="/images/svg/logo-vokapedia.svg" 
               alt="Vokapedia" 
               width={220} 
               height={50} 
