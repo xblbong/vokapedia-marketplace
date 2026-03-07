@@ -35,22 +35,22 @@ export default function ProductCard({ product }: { product: ProductProps }) {
             <div className="flex-1 px-1 md:px-[10px] flex flex-col">
                 {/* Title & Category Row */}
                 <div className="flex justify-between items-start w-full mb-2 md:mb-3 gap-2">
-                    <h3 className="text-[20px] sm:text-[22px] md:text-[26px] font-bold text-[#1E1E1E] leading-tight line-clamp-1">
+                    <h3 className="text-[14px] sm:text-[16px] md:text-[22px] font-bold text-[#1E1E1E] leading-tight line-clamp-1">
                         {product.title}
                     </h3>
-                    <span className="text-[10px] md:text-sm font-normal text-[#8F8F8F] text-right shrink-0 mt-1 md:mt-2">
+                    <span className="text-[10px] md:text-[11px] font-normal text-[#8F8F8F] text-right shrink-0 mt-1 md:mt-2">
                         {product.category}
                     </span>
                 </div>
 
-                <p className="text-[13px] md:text-sm text-[#8F8F8F] leading-snug md:leading-5 line-clamp-2 mb-4 md:mb-6">
+                <p className="text-[11px] md:text-[11px] text-[#8F8F8F] leading-snug md:leading-5 line-clamp-2 mb-4 md:mb-6">
                     {product.description}
                 </p>
 
                 {/* Price & Button Row */}
                 <div className="mt-auto pb-1 flex justify-between items-end gap-2">
                     <div className="flex flex-col">
-                        <span className="text-[10px] md:text-[12px] text-[#8F8F8F]">Mulai dari</span>
+                        <span className="text-[10px] md:text-[11px] text-[#8F8F8F]">Mulai dari</span>
                         <span className="text-[16px] md:text-[20px] font-bold text-[#1E1E1E] whitespace-nowrap">
                             {formatPrice(product.price)}
                         </span>
@@ -58,7 +58,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
 
                     <Link
                         href={`/produk/${product.id}`}
-                        className="bg-[#1E1E1E] text-white px-3 py-2 md:px-[20px] md:py-[10px] rounded-[8px] md:rounded-[10px] text-[12px] md:text-[14px] font-bold hover:bg-black transition-colors shrink-0"
+                        className="bg-[#1E1E1E] text-white px-3 py-2 md:px-[10px] md:py-[8px] rounded-[8px] md:rounded-[10px] text-[10px] md:text-[11px] font-normal hover:bg-black transition-colors shrink-0"
                     >
                         Lihat Produk
                     </Link>
