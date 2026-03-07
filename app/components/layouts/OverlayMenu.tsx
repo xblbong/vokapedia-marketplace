@@ -6,7 +6,7 @@ export default function OverlayMenu({ isOpen, onClose }: { isOpen: boolean; onCl
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-white/90 animate-in slide-in-from-top duration-500 overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-white/96 animate-in slide-in-from-top duration-500 overflow-y-auto">
       <div className="max-w-7xl mx-auto px-6 md:px-20 py-10 relative">
         
         {/* Close button X */}
