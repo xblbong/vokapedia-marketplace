@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DM_Sans} from "next/font/google";
 import "./globals.css";
 import NavbarComponent from "./components/layouts/NavbarComponent";
+import Footer from "./components/layouts/Footer";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -25,6 +26,7 @@ export default function RootLayout({
       >
         <NavbarComponent />
         {children}
+        <Footer />
       </body>
     </html>
   );
