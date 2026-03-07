@@ -52,15 +52,13 @@ body {
 }
 
 /* navbar */
-.nav-shadow {
-  box-shadow: 0px 4px 20px 0px #C5C5C540;
-}
-
-/* Custom Utilities untuk spesifikasi font */
 .text-menu-active {
   font-family: var(--font-dm-sans);
   font-weight: 700;
-  font-size: 22px;
+  font-size: 18px;
+  @media (min-width: 1280px) {
+    font-size: 22px;
+  }
   line-height: 150%;
   letter-spacing: -1.1%;
   color: #1E1E1E;
@@ -69,10 +67,17 @@ body {
 .text-menu-inactive {
   font-family: var(--font-dm-sans);
   font-weight: 400;
-  font-size: 22px;
+  font-size: 18px;
+  @media (min-width: 1280px) {
+    font-size: 22px;
+  }
   line-height: 150%;
   letter-spacing: -1.1%;
   color: #8F8F8F;
+}
+
+.nav-shadow {
+  box-shadow: 0px 4px 20px 0px #C5C5C540;
 }
 
 /* slider components */
