@@ -1,6 +1,6 @@
-import FilterSidebar from "@/app/components/FilterSidebar/FilterSidebar";
-import ProductCard from "@/app/components/ProductCard/ProductCard";
-import ProductHero from "@/app/components/ProductCard/ProductHero";
+import FilterSidebar from "@/src/components/FilterSidebar/FilterSidebar";
+import ProductCard from "@/src/components/ProductCard/ProductCard";
+import ProductHero from "@/src/components/ProductCard/ProductHero";
 
 
 export default function ProdukPage() {

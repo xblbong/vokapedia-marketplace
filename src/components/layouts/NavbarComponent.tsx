@@ -3,7 +3,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { USER_NAV_LINKS } from "@/app/components/constants/navigation";
+import { USER_NAV_LINKS } from "@/src/components/constants/navigation";
 import OverlayMenu from "./OverlayMenu";
 
 export default function NavbarComponent() {

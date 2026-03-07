@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/app/lib/prisma";
+import { prisma } from "@/src/lib/prisma";
 
 export async function registerUser(formData: FormData) {
     const email = formData.get("email") as string;

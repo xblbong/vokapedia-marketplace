@@ -1,5 +1,5 @@
 "use client";
-import { OVERLAY_MENU } from "@/app/components/constants/navigation";
+import { OVERLAY_MENU } from "@/src/components/constants/navigation";
 import Link from "next/link";
 
 export default function OverlayMenu({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {

@@ -1,6 +1,6 @@
 "use client";
 
-import ProductCard from "@/app/components/ProductCard/ProductCard";
+import ProductCard from "@/src/components/ProductCard/ProductCard";
 
 const MOCK_PRODUCTS = [
   { id: "1", title: "Pop Ame", category: "Desain Grafis", description: "Aksesori handmade dari bahan daur ulang dengan desain playful dan customizable", price: 17000, image: "/images/svg/product1.svg" },
