@@ -1,4 +1,7 @@
+"use client";
+import { useState } from "react";
 import FilterSidebar from "@/src/components/FilterSidebar/FilterSidebar";
+import Pagination from "@/src/components/Pagination/Pagination";
 import ProductCard from "@/src/components/ProductCard/ProductCard";
 import ProductHero from "@/src/components/ProductCard/ProductHero";
 
@@ -12,39 +15,52 @@ const MOCK_PRODUCTS = [
 ];
 
 export default function ProductSection() {
+    const [currentPage, setCurrentPage] = useState(1);
+    const totalPages = 3;
+
     return (
         <main className="min-h-screen bg-[#F6F6F6] pb-20">
             <ProductHero />
 
-            <div className="layout-container flex flex-col lg:flex-row gap-10">
-                {/* KIRI: Filter Sidebar */}
-                <FilterSidebar />
+            <div className="layout-container flex flex-col lg:flex-row gap-8 xl:gap-12 mt-10 px-4 md:px-10 lg:px-0">
+                
+                {/* KIRI: Filter Sidebar (Akan berada di atas di mobile, di kiri di desktop) */}
+                <aside className="w-full lg:w-[280px] shrink-0">
+                    <FilterSidebar />
+                </aside>
 
                 {/* KANAN: Content Area */}
-                <div className="flex-1 flex flex-col gap-8">
+                <div className="flex-1 flex flex-col gap-6 md:gap-8">
+                    
+                    {/* Title Header */}
                     <div className="flex justify-between items-center">
-                        <h2 className="text-[24px] font-bold text-[#1E1E1E]">Semua Produk</h2>
+                        <h2 className="text-[20px] md:text-[24px] font-bold text-[#1E1E1E]">
+                            Semua Produk
+                        </h2>
+                        <p className="text-[12px] md:text-[14px] text-[#8F8F8F]">
+                            Menampilkan {MOCK_PRODUCTS.length} Produk
+                        </p>
                     </div>
 
-                    <div className="flex flex-wrap justify-center gap-y-8 gap-x-5 md:gap-x-6 lg:gap-x-8">
+                    <div className="flex flex-wrap justify-center lg:justify-start gap-y-6 gap-x-4 md:gap-x-6">
                         {MOCK_PRODUCTS.map((item) => (
                             <div
                                 key={item.id}
-                                className="flex w-full sm:w-[40rem] lg:w-[17rem]"
+                                className="flex w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.33%-16px)] max-w-[400px] lg:max-w-none"
                             >
                                 <ProductCard product={item} />
                             </div>
                         ))}
                     </div>
 
-                    {/* Pagination */}
-                    <div className="flex justify-center items-center gap-4 mt-10">
-                        <button className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center opacity-50">←</button>
-                        <button className="w-10 h-10 rounded-full bg-[#0062FF] text-white font-bold">1</button>
-                        <button className="w-10 h-10 rounded-full bg-white border border-gray-200 hover:bg-gray-50">2</button>
-                        <button className="w-10 h-10 rounded-full bg-white border border-gray-200 hover:bg-gray-50">3</button>
-                        <button className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50">→</button>
+                    <div className="mt-6">
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={(page) => setCurrentPage(page)}
+                        />
                     </div>
+
                 </div>
             </div>
         </main>
