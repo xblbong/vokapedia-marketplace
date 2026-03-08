@@ -4,6 +4,7 @@ import FilterSidebar from "@/src/components/FilterSidebar/FilterSidebar";
 import Pagination from "@/src/components/Pagination/Pagination";
 import ProductCard from "@/src/components/ProductCard/ProductCard";
 import ProductHero from "@/src/components/ProductCard/ProductHero";
+import StartupSummary from "@/src/components/StartupSummary/StartupSummary";
 
 const MOCK_PRODUCTS = [
     { id: "1", title: "Pop Ame", category: "Desain Grafis", description: "Aksesori handmade dari bahan daur ulang dengan desain playful dan customizable", price: 17000, image: "/images/svg/product1.svg" },
@@ -14,6 +15,7 @@ const MOCK_PRODUCTS = [
     { id: "6", title: "Nocturnals", category: "Administrasi Bisnis", description: "Brand Streetwear limited edition premium yang menghadirkan desain eksklusif dan menarik", price: 17000, image: "/images/svg/product1.svg" },
 ];
 
+
 export default function ProductSection() {
     const [currentPage, setCurrentPage] = useState(1);
     const totalPages = 3;
@@ -23,7 +25,7 @@ export default function ProductSection() {
             <ProductHero />
 
             <div className="layout-container flex flex-col lg:flex-row gap-8 xl:gap-12 mt-10 px-4 md:px-10 lg:px-0">
-                
+
                 {/* KIRI: Filter Sidebar (Akan berada di atas di mobile, di kiri di desktop) */}
                 <aside className="w-full lg:w-[280px] shrink-0">
                     <FilterSidebar />
@@ -31,7 +33,7 @@ export default function ProductSection() {
 
                 {/* KANAN: Content Area */}
                 <div className="flex-1 flex flex-col gap-6 md:gap-8">
-                    
+
                     {/* Title Header */}
                     <div className="flex justify-between items-center">
                         <h2 className="text-[20px] md:text-[24px] font-bold text-[#1E1E1E]">
@@ -60,7 +62,6 @@ export default function ProductSection() {
                             onPageChange={(page) => setCurrentPage(page)}
                         />
                     </div>
-
                 </div>
             </div>
         </main>
