@@ -55,7 +55,7 @@ export default function NavbarComponent() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`text-[14px] lg:text-[16px] font-medium transition-colors ${isActive ? "text-[#0062FF] font-bold" : "text-[#545454] hover:text-[#1E1E1E]"
+                  className={`text-[14px] lg:text-[16px] font-medium transition-colors ${isActive ? "text-[#1E1E1E] font-bold" : "text-[#545454] hover:text-[#1E1E1E]"
                     }`}
                 >
                   {link.name}
