@@ -8,7 +8,7 @@ export default function ProductHero() {
         
         {/* Background Image */}
         <Image 
-          src="/images/svg/bg-produk.svg" 
+          src="/images/png/bg-produk.png" 
           alt="Banner Produk" 
           fill 
           className="object-cover"

@@ -42,7 +42,7 @@ export default function ProductView({ product }: ProductViewProps) {
   };
 
   return (
-    <div className="layout-container py-12 md:py-44">
+    <div className="layout-container py-7 md:py-16">
       <div className="flex flex-col lg:flex-row gap-12 lg:gap-20">
         
         {/* KIRI: GALERI GAMBAR */}
