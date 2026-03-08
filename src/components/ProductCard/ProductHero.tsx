@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function ProductHero() {
   return (
-    <section className="mt-16 md:mt-20 lg:mt-20 py-6 md:py-10">
+    <section className="mt-9 md:mt-10 lg:mt-10 py-6 md:py-10">
       <div className="relative w-full h-[280px] sm:h-[350px] md:h-[400px] lg:h-[480px] overflow-hidden group">
         
         {/* Background Image */}
