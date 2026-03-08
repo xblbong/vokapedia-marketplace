@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,50 +11,52 @@ export default function NavbarComponent() {
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
   const pathname = usePathname();
 
+  // Konfigurasi Halaman Banner
+  const showBanner = pathname === "/";
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-40 bg-white">
-      {/* Container Utama Navbar - Padding & Height disesuaikan */}
-      <div className="layout-container nav-shadow px-4 md:px-10 xl:px-24 py-3 md:py-4 flex items-center justify-between min-h-[64px] md:min-h-[80px]">
-        
-        {/* KIRI: Logo & Search Bar */}
-        <div className="flex items-center gap-4 lg:gap-8 xl:gap-10 flex-1">
+      {/* Main Navbar Section */}
+      <div className="layout-container nav-shadow px-4 md:px-10 lg:px-24 py-3 md:py-5 flex items-center justify-between min-h-[64px] md:min-h-[80px]">
+
+        {/* Left: Logo & Search Bar */}
+        <div className="flex items-center gap-6 lg:gap-10 flex-1">
           <Link href="/" className="shrink-0">
-            <Image 
-              src="/images/svg/logo-vokapedia.svg" 
-              alt="Vokapedia" 
-              width={220} 
-              height={50} 
-              className="object-contain w-[140px] md:w-[180px] lg:w-[220px] h-auto" 
+            <Image
+              src="/images/svg/logo-vokapedia.svg"
+              alt="Vokapedia Logo"
+              width={220}
+              height={50}
+              className="w-[140px] md:w-[180px] lg:w-[220px] h-auto object-contain"
+              priority
             />
           </Link>
 
-          {/* Search Bar - Ukuran font & padding disesuaikan */}
-          <div className="hidden lg:flex relative w-full max-w-[300px] xl:max-w-[429px] h-[40px] xl:h-[48px]">
+          <div className="hidden lg:flex relative w-full max-w-[320px] xl:max-w-[430px]">
             <input
               type="text"
-              placeholder="Cari.."
-              className="w-full h-full pl-4 pr-10 rounded-full border border-[#C3C3C3] focus:outline-none focus:ring-1 focus:ring-gray-400 transition-all
-                         font-['DM_Sans'] font-normal text-[14px] xl:text-[18px] placeholder:text-[#8F8F8F]"
+              placeholder="Cari startup atau produk..."
+              className="w-full h-[44px] xl:h-[48px] pl-5 pr-12 rounded-full border border-[#C3C3C3] focus:outline-none focus:border-[#0062FF] transition-all text-[14px] xl:text-[16px]"
             />
             <div className="absolute right-4 top-1/2 -translate-y-1/2">
-              <svg width="18" height="18" className="xl:w-6 xl:h-6" viewBox="0 0 24 24" fill="none" stroke="#1E1E1E" strokeWidth="2.5">
-                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E1E1E" strokeWidth="2.5">
+                <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
               </svg>
             </div>
           </div>
         </div>
 
-        {/* KANAN: Nav Links & Toggle */}
-        <div className="flex items-center gap-4 md:gap-8 xl:gap-[40px]">
-          {/* Nav Links - Jarak antar menu disesuaikan */}
-          <div className="hidden xl:flex items-center gap-6 xl:gap-[40px]">
+        {/* Right: Navigation Links & Menu Toggle */}
+        <div className="flex items-center gap-4 md:gap-8 lg:gap-12">
+          <div className="hidden md:flex items-center gap-4 lg:gap-8 xl:gap-10">
             {USER_NAV_LINKS.map((link) => {
               const isActive = pathname === link.href;
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={isActive ? "text-menu-active" : "text-menu-inactive hover:text-[#1E1E1E] transition-colors"}
+                  className={`text-[14px] lg:text-[16px] font-medium transition-colors ${isActive ? "text-[#0062FF] font-bold" : "text-[#545454] hover:text-[#1E1E1E]"
+                    }`}
                 >
                   {link.name}
                 </Link>
@@ -61,35 +64,37 @@ export default function NavbarComponent() {
             })}
           </div>
 
-          {/* Toggle Button - Ukuran disesuaikan untuk mobile */}
-          <button 
+          <button
             onClick={() => setIsOverlayOpen(true)}
-            className="w-9 h-9 md:w-[42px] md:h-[42px] flex items-center justify-center cursor-pointer hover:bg-gray-50 rounded-md transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors group"
+            aria-label="Toggle Menu"
           >
-            <svg width="28" height="18" className="md:w-[30px] md:h-[20px]" viewBox="0 0 30 20" fill="none">
-                <rect width="30" height="3.5" rx="1.75" fill="#1E1E1E"/>
-                <rect y="8.25" width="30" height="3.5" rx="1.75" fill="#1E1E1E"/>
-                <rect y="16.5" width="30" height="3.5" rx="1.75" fill="#1E1E1E"/>
-                <circle cx="26" cy="1.75" r="1.75" fill="#1E1E1E"/>
-                <circle cx="26" cy="10" r="1.75" fill="#1E1E1E"/>
-                <circle cx="26" cy="18.25" r="1.75" fill="#1E1E1E"/>
+            <svg width="30" height="20" viewBox="0 0 30 20" fill="none" className="md:w-[32px] md:h-[22px]">
+              <rect width="30" height="3.5" rx="1.75" fill="#1E1E1E" />
+              <rect y="8.25" width="30" height="3.5" rx="1.75" fill="#1E1E1E" />
+              <rect y="16.5" width="30" height="3.5" rx="1.75" fill="#1E1E1E" />
+              <circle cx="26" cy="1.75" r="1.75" fill="#1E1E1E" />
+              <circle cx="26" cy="10" r="1.75" fill="#1E1E1E" />
+              <circle cx="26" cy="18.25" r="1.75" fill="#1E1E1E" />
             </svg>
           </button>
         </div>
       </div>
 
-      {/* Banner Biru Tua Bawah - Font size lebih dinamis agar tidak overflow di HP */}
-      <div className="bg-[#00132B] py-2 md:py-[14px] px-4 flex justify-center items-center">
-        <p className="text-white font-['DM_Sans'] text-center leading-tight">
-          <span className="font-bold text-[10px] sm:text-[12px] md:text-[16px]">VOKAPEDIA</span> 
-          <span className="mx-1 md:mx-2 text-[10px] md:text-[16px]">|</span>
-          <span className="font-normal text-[10px] sm:text-[12px] md:text-[16px] opacity-90">
-            Marketplace Produk Startup Mahasiswa Fakultas Vokasi Universitas Brawijaya
-          </span>
-        </p>
-      </div>
+      {/* Conditional Banner Section */}
+      {showBanner && (
+        <div className="bg-[#00132B] py-2.5 md:py-3.5 px-4 flex justify-center items-center">
+          <p className="text-white text-center leading-tight tracking-wide">
+            <span className="font-bold text-[10px] sm:text-[13px] md:text-[16px]">VOKAPEDIA</span>
+            <span className="mx-2 text-[10px] md:text-[16px] opacity-50">|</span>
+            <span className="font-normal text-[10px] sm:text-[13px] md:text-[16px] opacity-90">
+              Marketplace Produk Startup Mahasiswa Fakultas Vokasi Universitas Brawijaya
+            </span>
+          </p>
+        </div>
+      )}
 
-      {/* Overlay Menu */}
+      {/* Overlay Navigation Menu */}
       <OverlayMenu isOpen={isOverlayOpen} onClose={() => setIsOverlayOpen(false)} />
     </nav>
   );
