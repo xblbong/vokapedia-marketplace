@@ -2,8 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
-import { Startup } from "@/src/types/startup";
 import Image from "next/image";
+import { Startup } from "@/src/types/star-up";
 
 interface StartupCardProps {
   startup: Startup;
