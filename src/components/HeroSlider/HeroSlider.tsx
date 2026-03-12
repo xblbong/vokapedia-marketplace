@@ -26,7 +26,7 @@ const DUMMY_DATA: SlideData[] = [
     tagline: "Info Kampus",
     title: "Vokasi UB Raih Penghargaan Startup Inovatif 2025",
     description: "Prestasi gemilang kembali ditorehkan oleh mahasiswa vokasi dalam ajang nasional tahunan yang diadakan di Jakarta kemarin malam.",
-    image: "/images/svg/background.svg",
+    image: "/images/png/test.jpg",
     link: "/berita/2",
   },
   {
@@ -34,8 +34,16 @@ const DUMMY_DATA: SlideData[] = [
     tagline: "Agenda",
     title: "Workshop Kewirausahaan Digital untuk Mahasiswa",
     description: "Ikuti rangkaian workshop intensif untuk mengasah skill bisnis digital kamu bersama mentor ahli dari berbagai startup ternama.",
-    image: "/images/svg/background.svg",
+    image: "/images/png/test2.jpeg",
     link: "/berita/3",
+  },
+  {
+    id: 4,
+    tagline: "Info Kampus",
+    title: "Vokasi UB Raih Penghargaan Startup Inovatif 2025",
+    description: "Prestasi gemilang kembali ditorehkan oleh mahasiswa vokasi dalam ajang nasional tahunan yang diadakan di Jakarta kemarin malam.",
+    image: "/images/png/test.jpg",
+    link: "/berita/4",
   },
 ];
 
