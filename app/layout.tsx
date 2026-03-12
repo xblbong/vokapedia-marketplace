@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import { DM_Sans} from "next/font/google";
+import { DM_Sans } from "next/font/google";
 import "./globals.css";
-import NavbarComponent from "../src/components/layouts/NavbarComponent";
-import Footer from "../src/components/layouts/Footer";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -20,13 +18,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${dmSans.variable} antialiased font-sans`}
-      >
-        <NavbarComponent />
+    <html lang="id">
+      <body className={`${dmSans.variable} antialiased font-sans`}>
         {children}
-        <Footer />
       </body>
     </html>
   );

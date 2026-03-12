@@ -7,20 +7,126 @@ datasource db {
   provider = "postgresql"
 }
 
+// ==================== ENUMS ====================
+
+enum Role {
+  ADMINISTRATOR
+  SUPERVISOR
+}
+
+enum ButtonType {
+  WHATSAPP
+  ECOMMERCE
+}
+
+// ==================== USER & AUTH ====================
+
 model User {
   id        Int      @id @default(autoincrement())
+  name      String
   email     String   @unique
-  name      String?
+  password  String
+  role      Role     @default(SUPERVISOR)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
+// ==================== CORE DATA ====================
+
+model ProgramStudi {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String
+  icon        String
+  startups    Startup[]
+}
+
+model Startup {
+  id             Int          @id @default(autoincrement())
+  name           String
+  slug           String       @unique
+  description    String
+  bannerImage    String       @default("")
+  profileImage   String       @default("")
+  programStudiId Int
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  programStudi   ProgramStudi @relation(fields: [programStudiId], references: [id])
+  teamMembers    TeamMember[]
+  products       Product[]
+  views          StartupView[]
+  buttonClicks   ButtonClick[] @relation("StartupClicks")
+}
+
+model TeamMember {
+  id           Int     @id @default(autoincrement())
+  name         String
+  role         String
+  photo        String  @default("")
+  instagramUrl String? // Optional Instagram link
+  startupId    Int
+
+  startup      Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  products Product[]
+}
+
 model Product {
   id          Int      @id @default(autoincrement())
-  name        String
-  description String?
+  title       String
+  description String   @default("")
   price       Decimal  @default(0)
   stock       Int      @default(0)
+  image       String   @default("")
+  startupId   Int
+  categoryId  Int
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  startup      Startup      @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  category     Category     @relation(fields: [categoryId], references: [id])
+  views        ProductView[]
+  buttonClicks ButtonClick[] @relation("ProductClicks")
+}
+
+// ==================== ANALYTICS ====================
+
+model PageView {
+  id        Int      @id @default(autoincrement())
+  page      String
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+}
+
+model ProductView {
+  id        Int      @id @default(autoincrement())
+  productId Int
+  createdAt DateTime @default(now())
+
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model StartupView {
+  id        Int      @id @default(autoincrement())
+  startupId Int
+  createdAt DateTime @default(now())
+
+  startup   Startup  @relation(fields: [startupId], references: [id], onDelete: Cascade)
+}
+
+model ButtonClick {
+  id        Int        @id @default(autoincrement())
+  type      ButtonType
+  productId Int?
+  startupId Int?
+  createdAt DateTime   @default(now())
+
+  product   Product?   @relation("ProductClicks", fields: [productId], references: [id], onDelete: Cascade)
+  startup   Startup?   @relation("StartupClicks", fields: [startupId], references: [id], onDelete: Cascade)
 }
