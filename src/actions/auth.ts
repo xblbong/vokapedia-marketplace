@@ -6,13 +6,15 @@ export async function registerUser(formData: FormData) {
     const email = formData.get("email") as string;
     const name = formData.get("name") as string | null;
 
+    const password = formData.get("password") as string || "";
+
     if (!email) {
         return { error: "Email is required" };
     }
 
     try {
         const user = await prisma.user.create({
-            data: { email, name },
+            data: { email, name: name ?? "", password },
         });
 
         return { success: true, user };

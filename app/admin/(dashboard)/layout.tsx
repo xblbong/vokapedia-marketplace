@@ -13,13 +13,13 @@ export default async function AdminDashboardLayout({
     const user = await requireAuth();
 
     return (
-        <div style={{ display: "flex", minHeight: "100vh", background: "#0a0a1a" }}>
+        <div style={{ display: "flex", minHeight: "100vh", background: "#F6F6F6" }}>
             <AdminSidebar userName={user.name} userRole={user.role} />
             <main style={{
                 flex: 1,
                 marginLeft: 260,
                 padding: "32px",
-                color: "#fff",
+                color: "#1E1E1E",
                 transition: "margin-left 0.3s ease",
             }}>
                 {children}
