@@ -38,10 +38,13 @@ export default function AdminSidebar({ userName, userRole }: { userName: string;
     return (
         <aside
             className={`fixed top-0 left-0 z-50 h-screen transition-all duration-300 ease-in-out border-r border-[var(--color-border-gray)] bg-[var(--color-nav-bg)] flex flex-col nav-shadow`}
-            style={{ width: collapsed ? "80px" : "280px" }}
+            style={{
+                width: collapsed ? 72 : 260,
+                minHeight: "100vh",
+            }}
         >
             {/* Header - Logo Section */}
-            <div className={`relative flex items-center h-[80px] px-6 border-b border-[var(--color-border-gray)] ${collapsed ? "justify-center" : "justify-between"}`}>
+            <div className={`relative flex items-center h-[80px] py-6 px-6 border-b border-[var(--color-border-gray)] ${collapsed ? "justify-center" : "justify-between"}`}>
                 <Link href="/admin" className={`flex items-center transition-all duration-300 ${collapsed ? "w-10 overflow-hidden" : "w-full"}`}>
                     <Image
                         src="/images/svg/logo-vokapedia.svg"
@@ -117,7 +120,7 @@ export default function AdminSidebar({ userName, userRole }: { userName: string;
                 {!collapsed && (
                     <div>
                         <p style={{ color: "#1E1E1E", fontSize: 13, fontWeight: 600, margin: 0 }}>{userName}</p>
-                        <p style={{ color: "#8F8F8F", fontSize: 11, margin: "2px 0 0" }}>{userRole}</p>
+                        <p style={{ color: "#8F8F8F", fontSize: 11, margin: "2px 0 0", textTransform: "capitalize" }}>{userRole}</p>
                     </div>
                 )}
                 <form action={logoutAdmin}>

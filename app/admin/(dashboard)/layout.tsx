@@ -13,15 +13,9 @@ export default async function AdminDashboardLayout({
     const user = await requireAuth();
 
     return (
-        <div style={{ display: "flex", minHeight: "100vh", background: "#F6F6F6" }}>
+        <div className="flex min-h-screen bg-[var(--color-page-bg)]">
             <AdminSidebar userName={user.name} userRole={user.role} />
-            <main style={{
-                flex: 1,
-                marginLeft: 260,
-                padding: "32px",
-                color: "#1E1E1E",
-                transition: "margin-left 0.3s ease",
-            }}>
+            <main className="flex-1 ml-[260px] p-8 text-[var(--color-main-text)] transition-[margin-left] duration-300 ease-in-out">
                 {children}
             </main>
         </div>

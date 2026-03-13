@@ -100,65 +100,50 @@ export default async function AdminDashboard() {
 
     return (
         <div>
-            <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8, color: "#1E1E1E" }}>Dashboard</h1>
-            <p style={{ color: "#8F8F8F", fontSize: 14, marginBottom: 32 }}>Selamat datang di Vokapedia Admin Panel</p>
+            <h1 className="text-[28px] font-bold mb-2 text-[var(--color-main-text)]">Dashboard</h1>
+            <p className="text-[var(--color-inactive-text)] text-sm mb-8">Selamat datang di Vokapedia Admin Panel</p>
 
             {/* Stat Cards */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 16, marginBottom: 32 }}>
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4 mb-8">
                 {statCards.map((card) => {
                     const Icon = iconMap[card.label];
                     return (
-                        <div key={card.label} style={{
-                            padding: "24px", borderRadius: 16,
-                            background: "#FFFFFF",
-                            border: "1px solid #E5E7EB",
-                            transition: "all 0.2s",
-                            boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-                        }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-                                <div style={{
-                                    width: 40, height: 40, borderRadius: 10,
-                                    background: `${card.color}12`,
-                                    display: "flex", alignItems: "center", justifyContent: "center",
-                                }}>
+                        <div key={card.label} className="p-6 rounded-2xl bg-white border border-gray-200 transition-all duration-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-md">
+                            <div className="flex justify-between items-start mb-3">
+                                <div
+                                    className="w-10 h-10 rounded-[10px] flex items-center justify-center"
+                                    style={{ background: `${card.color}12` }}
+                                >
                                     {Icon && <Icon size={20} color={card.color} strokeWidth={2} />}
                                 </div>
-                                <div style={{ width: 8, height: 8, borderRadius: "50%", background: card.color }} />
+                                <div className="w-2 h-2 rounded-full" style={{ background: card.color }} />
                             </div>
-                            <p style={{ fontSize: 32, fontWeight: 700, margin: "0 0 4px", color: "#1E1E1E" }}>{card.value}</p>
-                            <p style={{ fontSize: 13, color: "#8F8F8F", margin: 0 }}>{card.label}</p>
+                            <p className="text-[32px] font-bold mb-1 text-[var(--color-main-text)]">{card.value}</p>
+                            <p className="text-[13px] text-[var(--color-inactive-text)]">{card.label}</p>
                         </div>
                     );
                 })}
             </div>
 
             {/* Top Products & Startups */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 32 }}>
+            <div className="grid grid-cols-2 gap-5 mb-8">
                 {/* Top Products */}
-                <div style={{
-                    padding: "24px", borderRadius: 16,
-                    background: "#FFFFFF", border: "1px solid #E5E7EB",
-                    boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-                }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+                <div className="p-6 rounded-2xl bg-white border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+                    <div className="flex items-center gap-2 mb-4">
                         <TrendingUp size={18} color="#0062FF" strokeWidth={2} />
-                        <h3 style={{ fontSize: 16, fontWeight: 600, color: "#1E1E1E", margin: 0 }}>Produk Terpopuler</h3>
+                        <h3 className="text-base font-semibold text-[var(--color-main-text)]">Produk Terpopuler</h3>
                     </div>
                     {data.topProducts.length === 0 ? (
-                        <p style={{ color: "#8F8F8F", fontSize: 13 }}>Belum ada data</p>
+                        <p className="text-[var(--color-inactive-text)] text-[13px]">Belum ada data</p>
                     ) : (
-                        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                        <div className="flex flex-col gap-2.5">
                             {data.topProducts.map((p, i) => (
-                                <div key={i} style={{
-                                    display: "flex", justifyContent: "space-between", alignItems: "center",
-                                    padding: "10px 14px", borderRadius: 10,
-                                    background: "#F8FAFC",
-                                }}>
-                                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                        <span style={{ width: 24, height: 24, borderRadius: 6, background: "rgba(0,98,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#0062FF", fontWeight: 700 }}>{i + 1}</span>
-                                        <span style={{ fontSize: 14, color: "#1E1E1E" }}>{p.name}</span>
+                                <div key={i} className="flex justify-between items-center py-2.5 px-3.5 rounded-[10px] bg-[var(--color-brand-gray)]">
+                                    <div className="flex items-center gap-2.5">
+                                        <span className="w-6 h-6 rounded-md bg-[rgba(0,98,255,0.1)] flex items-center justify-center text-xs text-[var(--color-brand-blue)] font-bold">{i + 1}</span>
+                                        <span className="text-sm text-[var(--color-main-text)]">{p.name}</span>
                                     </div>
-                                    <span style={{ fontSize: 13, color: "#8F8F8F" }}>{p.views} views</span>
+                                    <span className="text-[13px] text-[var(--color-inactive-text)]">{p.views} views</span>
                                 </div>
                             ))}
                         </div>
@@ -166,30 +151,22 @@ export default async function AdminDashboard() {
                 </div>
 
                 {/* Top Startups */}
-                <div style={{
-                    padding: "24px", borderRadius: 16,
-                    background: "#FFFFFF", border: "1px solid #E5E7EB",
-                    boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-                }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+                <div className="p-6 rounded-2xl bg-white border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+                    <div className="flex items-center gap-2 mb-4">
                         <Store size={18} color="#F59E0B" strokeWidth={2} />
-                        <h3 style={{ fontSize: 16, fontWeight: 600, color: "#1E1E1E", margin: 0 }}>Startup Terpopuler</h3>
+                        <h3 className="text-base font-semibold text-[var(--color-main-text)]">Startup Terpopuler</h3>
                     </div>
                     {data.topStartups.length === 0 ? (
-                        <p style={{ color: "#8F8F8F", fontSize: 13 }}>Belum ada data</p>
+                        <p className="text-[var(--color-inactive-text)] text-[13px]">Belum ada data</p>
                     ) : (
-                        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                        <div className="flex flex-col gap-2.5">
                             {data.topStartups.map((s, i) => (
-                                <div key={i} style={{
-                                    display: "flex", justifyContent: "space-between", alignItems: "center",
-                                    padding: "10px 14px", borderRadius: 10,
-                                    background: "#F8FAFC",
-                                }}>
-                                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                        <span style={{ width: 24, height: 24, borderRadius: 6, background: "rgba(245,158,11,0.1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#F59E0B", fontWeight: 700 }}>{i + 1}</span>
-                                        <span style={{ fontSize: 14, color: "#1E1E1E" }}>{s.name}</span>
+                                <div key={i} className="flex justify-between items-center py-2.5 px-3.5 rounded-[10px] bg-[var(--color-brand-gray)]">
+                                    <div className="flex items-center gap-2.5">
+                                        <span className="w-6 h-6 rounded-md bg-[rgba(245,158,11,0.1)] flex items-center justify-center text-xs text-amber-500 font-bold">{i + 1}</span>
+                                        <span className="text-sm text-[var(--color-main-text)]">{s.name}</span>
                                     </div>
-                                    <span style={{ fontSize: 13, color: "#8F8F8F" }}>{s.views} views</span>
+                                    <span className="text-[13px] text-[var(--color-inactive-text)]">{s.views} views</span>
                                 </div>
                             ))}
                         </div>
@@ -198,30 +175,26 @@ export default async function AdminDashboard() {
             </div>
 
             {/* Recent Page Views */}
-            <div style={{
-                padding: "24px", borderRadius: 16,
-                background: "#FFFFFF", border: "1px solid #E5E7EB",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-            }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+            <div className="p-6 rounded-2xl bg-white border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+                <div className="flex items-center gap-2 mb-4">
                     <Clock size={18} color="#8B5CF6" strokeWidth={2} />
-                    <h3 style={{ fontSize: 16, fontWeight: 600, color: "#1E1E1E", margin: 0 }}>Aktivitas Terbaru</h3>
+                    <h3 className="text-base font-semibold text-[var(--color-main-text)]">Aktivitas Terbaru</h3>
                 </div>
                 {data.recentPageViews.length === 0 ? (
-                    <p style={{ color: "#8F8F8F", fontSize: 13 }}>Belum ada aktivitas</p>
+                    <p className="text-[var(--color-inactive-text)] text-[13px]">Belum ada aktivitas</p>
                 ) : (
-                    <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                    <table className="w-full border-collapse">
                         <thead>
-                            <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
-                                <th style={{ textAlign: "left", padding: "10px 0", fontSize: 12, color: "#8F8F8F", fontWeight: 500 }}>Halaman</th>
-                                <th style={{ textAlign: "right", padding: "10px 0", fontSize: 12, color: "#8F8F8F", fontWeight: 500 }}>Waktu</th>
+                            <tr className="border-b border-gray-200">
+                                <th className="text-left py-2.5 text-xs text-[var(--color-inactive-text)] font-medium">Halaman</th>
+                                <th className="text-right py-2.5 text-xs text-[var(--color-inactive-text)] font-medium">Waktu</th>
                             </tr>
                         </thead>
                         <tbody>
                             {data.recentPageViews.map((pv) => (
-                                <tr key={pv.id} style={{ borderBottom: "1px solid #F3F4F6" }}>
-                                    <td style={{ padding: "10px 0", fontSize: 13, color: "#1E1E1E" }}>{pv.page}</td>
-                                    <td style={{ padding: "10px 0", fontSize: 12, color: "#8F8F8F", textAlign: "right" }}>
+                                <tr key={pv.id} className="border-b border-gray-100">
+                                    <td className="py-2.5 text-[13px] text-[var(--color-main-text)]">{pv.page}</td>
+                                    <td className="py-2.5 text-xs text-[var(--color-inactive-text)] text-right">
                                         {new Date(pv.createdAt).toLocaleString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
                                     </td>
                                 </tr>
