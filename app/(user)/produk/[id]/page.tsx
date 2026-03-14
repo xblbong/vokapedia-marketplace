@@ -9,7 +9,7 @@ import ProductCard from "@/src/components/ProductCard/ProductCard";
 
 
 const startupData = {
-    id: "startup-123",
+    id: "1",
     name: "Pop Ame",
     logoUrl: "/images/svg/pp-akun.svg",
     productCount: 5,
