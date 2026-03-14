@@ -37,7 +37,7 @@ export default async function AdminUsersPage() {
                 columns={["name", "email", "role", "createdAt"]}
                 columnLabels={["Nama", "Email", "Role", "Dibuat"]}
                 formFields={[
-                    { name: "name", label: "Nama", type: "text", required: true },
+                    { name: "name", label: "Username", type: "text", required: true, minLength: 7 },
                     { name: "email", label: "Email", type: "email", required: true },
                     { name: "password", label: "Password", type: "password", required: true },
                     {

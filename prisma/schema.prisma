@@ -85,6 +85,7 @@ model Product {
   image       String   @default("")
   startupId   Int
   categoryId  Int
+  ecommerceUrl String  @default("")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

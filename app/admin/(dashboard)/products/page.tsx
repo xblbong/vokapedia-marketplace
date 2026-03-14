@@ -30,21 +30,24 @@ export default async function AdminProductsPage() {
                     price: Number(p.price),
                     stock: p.stock,
                     image: p.image,
+                    ecommerceUrl: p.ecommerceUrl,
                     startupId: String(p.startupId),
                     categoryId: String(p.categoryId),
                     startup: p.startup.name,
                     category: p.category.name,
                 }))}
-                columns={["title", "price", "stock", "startup", "category"]}
-                columnLabels={["Nama Produk", "Harga", "Stok", "Startup", "Kategori"]}
+                columns={["title", "price", "stock", "image", "startup", "category", "ecommerceUrl"]}
+                columnLabels={["Nama Produk", "Harga", "Stok", "Gambar", "Startup", "Kategori", "Link E-commerce"]}
+                imageColumns={["image"]}
                 formFields={[
                     { name: "title", label: "Nama Produk", type: "text", required: true },
-                    { name: "description", label: "Deskripsi", type: "textarea" },
-                    { name: "price", label: "Harga", type: "number", required: true },
-                    { name: "stock", label: "Stok", type: "number" },
-                    { name: "image", label: "URL Gambar", type: "text" },
+                    { name: "description", label: "Deskripsi", type: "textarea", required: true, minWords: 10 },
+                    { name: "price", label: "Harga", type: "rupiah", required: true },
+                    { name: "stock", label: "Stok", type: "number", required: true, min: 1 },
                     { name: "startupId", label: "Startup", type: "select", options: startups.map(s => ({ value: String(s.id), label: s.name })), required: true },
                     { name: "categoryId", label: "Kategori", type: "select", options: categories.map(c => ({ value: String(c.id), label: c.name })), required: true },
+                    { name: "ecommerceUrl", label: "Link E-commerce", type: "url", required: true },
+                    { name: "image", label: "Gambar Produk", type: "file", multiple: true },
                 ]}
             />
         </div>

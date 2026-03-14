@@ -21,12 +21,13 @@ export default async function AdminProgramStudiPage() {
             <AdminCrudTable
                 type="program-studi"
                 data={programStudis.map(p => ({ id: p.id, name: p.name, description: p.description, icon: p.icon, startups: p._count.startups }))}
-                columns={["name", "description", "startups"]}
-                columnLabels={["Nama Prodi", "Deskripsi", "Jumlah Startup"]}
+                columns={["name", "description", "icon", "startups"]}
+                columnLabels={["Nama Prodi", "Deskripsi", "Icon", "Jumlah Startup"]}
+                imageColumns={["icon"]}
                 formFields={[
                     { name: "name", label: "Nama Program Studi", type: "text", required: true },
                     { name: "description", label: "Deskripsi", type: "textarea" },
-                    { name: "icon", label: "URL Icon SVG", type: "text" },
+                    { name: "icon", label: "Icon SVG", type: "file" },
                 ]}
             />
         </div>

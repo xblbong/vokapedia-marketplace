@@ -14,6 +14,7 @@ import {
     LogOut,
     ChevronLeft,
     ChevronRight,
+    ClipboardList,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -24,6 +25,7 @@ const MENU_ITEMS = [
     { name: "Kategori", href: "/admin/categories", icon: Tag },
     { name: "Program Studi", href: "/admin/program-studi", icon: GraduationCap },
     { name: "Users", href: "/admin/users", icon: Users },
+    { name: "Rekap Startup", href: "/admin/recap-startups", icon: ClipboardList },
 ];
 
 export default function AdminSidebar({ userName, userRole }: { userName: string; userRole: string }) {

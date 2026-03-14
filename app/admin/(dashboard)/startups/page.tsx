@@ -1,7 +1,7 @@
 import { prisma } from "@/src/lib/prisma";
 import { requireAuth } from "@/src/lib/auth";
-import AdminCrudTable from "@/src/components/admin/AdminCrudTable";
 import { Building2 } from "lucide-react";
+import StartupManager from "@/src/components/admin/StartupManager";
 
 export default async function AdminStartupsPage() {
     await requireAuth();
@@ -9,6 +9,7 @@ export default async function AdminStartupsPage() {
     const startups = await prisma.startup.findMany({
         include: {
             programStudi: { select: { name: true } },
+            teamMembers: true,
             _count: { select: { teamMembers: true, products: true } },
         },
         orderBy: { createdAt: "desc" },
@@ -23,28 +24,26 @@ export default async function AdminStartupsPage() {
                 </div>
                 <h1 className="text-[28px] font-bold text-[var(--color-main-text)]">Kelola Startup</h1>
             </div>
-            <AdminCrudTable
-                type="startup"
-                data={startups.map(s => ({
+            <StartupManager
+                startups={startups.map(s => ({
                     id: s.id,
                     name: s.name,
                     description: s.description,
                     bannerImage: s.bannerImage,
                     profileImage: s.profileImage,
-                    programStudiId: String(s.programStudiId),
-                    programStudi: s.programStudi.name,
-                    members: s._count.teamMembers,
-                    products: s._count.products,
+                    programStudiId: s.programStudiId,
+                    programStudiName: s.programStudi.name,
+                    membersCount: s._count.teamMembers,
+                    productsCount: s._count.products,
+                    teamMembers: s.teamMembers.map(m => ({
+                        id: m.id,
+                        name: m.name,
+                        role: m.role,
+                        photo: m.photo,
+                        instagramUrl: m.instagramUrl || "",
+                    })),
                 }))}
-                columns={["name", "programStudi", "members", "products"]}
-                columnLabels={["Nama Startup", "Program Studi", "Anggota", "Produk"]}
-                formFields={[
-                    { name: "name", label: "Nama Startup", type: "text", required: true },
-                    { name: "description", label: "Deskripsi", type: "textarea" },
-                    { name: "bannerImage", label: "URL Banner Image", type: "text" },
-                    { name: "profileImage", label: "URL Profile Image", type: "text" },
-                    { name: "programStudiId", label: "Program Studi", type: "select", options: programStudis.map(p => ({ value: String(p.id), label: p.name })), required: true },
-                ]}
+                programStudis={programStudis.map(p => ({ value: String(p.id), label: p.name }))}
             />
         </div>
     );
