@@ -95,7 +95,7 @@ export default async function HomePage() {
   const beritaTefa = mapBerita(beritaTefaData);
 
   return (
-    <div className="space-y-32">
+    <div className="space-y-2">
       <HeroSection slides={heroSlides} />
       <ProductSection products={products} prodiList={prodiList} kategoriList={kategoriList} />
       <AboutSection />

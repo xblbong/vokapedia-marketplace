@@ -3,6 +3,7 @@ import FilterSidebar from "@/src/components/FilterSidebar/FilterSidebar";
 import Pagination from "@/src/components/Pagination/Pagination";
 import ProductCard from "@/src/components/ProductCard/ProductCard";
 import ProductHero from "@/src/components/ProductCard/ProductHero";
+import { Search } from "lucide-react";
 import StartupSummary from "@/src/components/StartupSummary/StartupSummary";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
@@ -103,8 +104,8 @@ export default function ProductSection({
                         </div>
                     ) : (
                         <div className="flex flex-col items-center justify-center py-16 md:py-24 bg-white rounded-2xl border border-gray-100 text-center px-4 w-full nav-shadow">
-                            <div className="w-[100px] h-[100px] md:w-[140px] md:h-[140px] mb-6 relative">
-                                <img src="/images/svg/icons/search.svg" alt="Not found" className="object-contain w-full h-full opacity-30 grayscale" />
+                            <div className="w-[100px] h-[100px] md:w-[140px] md:h-[140px] mb-6 relative flex items-center justify-center">
+                                <Search className="w-full h-full text-gray-300 opacity-60" strokeWidth={1} />
                             </div>
                             <h3 className="text-[20px] md:text-[24px] font-bold text-[#1E1E1E] mb-3">Produk Tidak Ditemukan</h3>
                             <p className="text-[14px] md:text-[16px] text-[#8F8F8F] max-w-[450px] mb-8">

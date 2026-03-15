@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -25,17 +25,27 @@ export default function NavbarComponent({ overlayMenu = [] }: NavbarProps) {
   const initialQuery = searchParams.get("q") || "";
   const [searchTerm, setSearchTerm] = useState(initialQuery);
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const isTyping = useRef(false);
 
   // Sync state dengan URL (bila user back/forward atau direct url)
   useEffect(() => {
-    setSearchTerm(searchParams.get("q") || "");
+    if (!isTyping.current) {
+      setSearchTerm(searchParams.get("q") || "");
+    }
   }, [searchParams]);
 
   // Push URL perubahan query otomatis ketika user selesai mengetik (debounce)
   useEffect(() => {
-    // Pastikan hanya route jika isi search term berubah dari nilai param saat ini
     const currentParam = searchParams.get("q") || "";
-    if (debouncedSearchTerm !== currentParam) {
+    
+    // Reset status typing jika URL sudah tersinkronisasi dengan state debounce
+    if (debouncedSearchTerm === currentParam) {
+      isTyping.current = false;
+      return;
+    }
+
+    // Pastikan hanya route jika isi search term berubah murni dari user mengetik
+    if (isTyping.current) {
       const url = new URL("/produk", window.location.href);
 
       // Jika sudah di halaman produk, pertahankan filter prodi/kategori
@@ -81,7 +91,10 @@ export default function NavbarComponent({ overlayMenu = [] }: NavbarProps) {
               type="text"
               placeholder="Cari startup atau produk..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                isTyping.current = true;
+                setSearchTerm(e.target.value);
+              }}
               className="w-full h-[44px] xl:h-[48px] pl-5 pr-12 rounded-full border border-[#C3C3C3] focus:outline-none focus:border-[#0062FF] transition-all text-[14px] xl:text-[16px]"
             />
             <div className="absolute right-4 top-1/2 -translate-y-1/2">
