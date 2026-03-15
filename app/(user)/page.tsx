@@ -101,8 +101,8 @@ export default async function HomePage() {
       <AboutSection />
       {beritaProgram.length > 0 && <BeritaSection title="Program & Agenda Vokasi" berita={beritaProgram} />}
       <ProgramStudi programStudis={programStudis} />
-      <BikTefaSection />
       <BeritaSection title="Berita Penawaran Terbaru" berita={beritaTerbaru} />
+      <BikTefaSection />
       {beritaTefa.length > 0 && <BeritaSection title="Update Teaching Factory" berita={beritaTefa} />}
     </div>
   );

@@ -17,6 +17,8 @@ import {
     ClipboardList,
     Newspaper,
     BookOpen,
+    FileText,
+    MenuSquare,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -24,6 +26,8 @@ const MENU_ITEMS = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Manajemen Berita", href: "/admin/berita", icon: Newspaper },
     { name: "Kategori Berita", href: "/admin/kategori-berita", icon: BookOpen },
+    { name: "Halaman & Info", href: "/admin/halaman", icon: FileText },
+    { name: "Menu Overlay", href: "/admin/menu-overlay", icon: MenuSquare },
     { name: "Produk", href: "/admin/products", icon: Package },
     { name: "Startup", href: "/admin/startups", icon: Building2 },
     { name: "Kategori Produk", href: "/admin/categories", icon: Tag },

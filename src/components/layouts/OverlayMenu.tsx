@@ -1,13 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { OVERLAY_MENU, USER_NAV_LINKS } from "@/src/components/constants/navigation";
+import { USER_NAV_LINKS } from "@/src/components/constants/navigation";
 import Link from "next/link";
 import { Search, X, ArrowRight } from "lucide-react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useDebounce } from "@/src/hooks/useDebounce";
 
-export default function OverlayMenu({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+interface OverlayMenuProps {
+  isOpen: boolean;
+  onClose: () => void;
+  menuData?: { title: string, items: { label: string, href: string }[] }[];
+}
+
+export default function OverlayMenu({ isOpen, onClose, menuData = [] }: OverlayMenuProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -89,28 +95,33 @@ export default function OverlayMenu({ isOpen, onClose }: { isOpen: boolean; onCl
           <div className="h-[1px] bg-gray-200 w-full mt-8"></div>
         </div>
 
-        {/* 3. Secondary Navigation (OVERLAY_MENU) */}
+        {/* 3. Secondary Navigation (Dynamic menuData) */}
         <div className="space-y-12 md:space-y-16">
-          {OVERLAY_MENU.map((section, idx) => (
-            <div key={idx} className="pb-4">
-              <h3 className="text-[18px] md:text-[20px] font-bold text-[#1E1E1E] mb-6 capitalize tracking-wider">
-                {section.title}
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-5">
-                {section.items.map((item, i) => (
-                  <Link 
-                    key={i} 
-                    href={item.href} 
-                    onClick={onClose}
-                    className="text-[18px] md:text-[20px] font-normal text-[#545454] hover:text-[#0062FF] transition-colors border-b border-gray-50 pb-2 md:border-none"
-                  >
-                    {item.label}
-                  </Link>
-                ))}
+          {menuData.length > 0 ? (
+            menuData.map((section, idx) => (
+              <div key={idx} className="pb-4">
+                <h3 className="text-[18px] md:text-[20px] font-bold text-[#1E1E1E] mb-6 capitalize tracking-wider">
+                  {section.title}
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-5">
+                  {section.items.map((item, itemIdx) => (
+                    <Link 
+                      key={itemIdx} 
+                      href={item.href}
+                      onClick={onClose}
+                      className="group flex items-center gap-3 py-2 text-[#545454] hover:text-[#0062FF] transition-colors"
+                    >
+                      <div className="w-[6px] h-[6px] rounded-full bg-[#D9D9D9] group-hover:bg-[#0062FF] transition-colors" />
+                      <span className="text-[16px] md:text-[18px] font-medium w-[90%] md:w-auto leading-tight">{item.label}</span>
+                    </Link>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <div className="pb-4 text-gray-400 italic">Belum ada menu yang dikonfigurasi.</div>
+          )}
         </div>
 
       </div>

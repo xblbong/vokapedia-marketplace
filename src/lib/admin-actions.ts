@@ -699,3 +699,143 @@ export async function deleteBerita(id: number) {
     revalidatePath("/admin/berita");
     revalidatePath("/");
 }
+
+// ==================== HALAMAN STATIS ====================
+
+export async function createHalaman(formData: FormData) {
+    await requireAuth();
+    const title = formData.get("title") as string;
+    const content = formData.get("content") as string;
+    const idempotencyKey = formData.get("idempotencyKey") as string;
+
+    if (!title || !content) return { error: "Semua field wajib diisi" };
+    if (!idempotencyKey) return { error: "Terjadi kesalahan sistem (no idempotency key)" };
+
+    const checked = checkIdempotency(idempotencyKey);
+    if (checked) return checked;
+
+    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+
+    try {
+        await prisma.halaman.create({
+            data: { title, slug, content },
+        });
+        const result = { success: true };
+        storeIdempotency(idempotencyKey, result);
+        revalidatePath("/admin/halaman");
+        return result;
+    } catch (err) {
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+            return { error: "Halaman dengan judul/slug ini sudah ada" };
+        }
+        return { error: "Gagal membuat halaman" };
+    }
+}
+
+export async function updateHalaman(id: number, formData: FormData) {
+    await requireAuth();
+    const title = formData.get("title") as string;
+    const content = formData.get("content") as string;
+    const idempotencyKey = formData.get("idempotencyKey") as string;
+
+    if (!title || !content) return { error: "Semua field wajib diisi" };
+    if (!idempotencyKey) return { error: "Terjadi kesalahan sistem (no idempotency key)" };
+
+    const checked = checkIdempotency(idempotencyKey);
+    if (checked) return checked;
+
+    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+
+    try {
+        await prisma.halaman.update({
+            where: { id },
+            data: { title, slug, content },
+        });
+        const result = { success: true };
+        storeIdempotency(idempotencyKey, result);
+        revalidatePath("/admin/halaman");
+        revalidatePath(`/halaman/${slug}`);
+        return result;
+    } catch (err) {
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+            return { error: "Halaman dengan judul/slug ini sudah ada" };
+        }
+        return { error: "Gagal memperbarui halaman" };
+    }
+}
+
+export async function deleteHalaman(id: number) {
+    await requireAuth();
+    await prisma.halaman.delete({ where: { id } });
+    revalidatePath("/admin/halaman");
+}
+
+// ==================== MENU OVERLAY ====================
+
+export async function createMenuOverlayItem(formData: FormData) {
+    await requireAuth();
+    const sectionName = formData.get("sectionName") as string;
+    const label = formData.get("label") as string;
+    const url = formData.get("url") as string;
+    const orderStr = formData.get("order") as string;
+    const idempotencyKey = formData.get("idempotencyKey") as string;
+
+    if (!sectionName || !label || !url) return { error: "Semua field wajib diisi" };
+    if (!idempotencyKey) return { error: "Terjadi kesalahan sistem (no idempotency key)" };
+
+    const checked = checkIdempotency(idempotencyKey);
+    if (checked) return checked;
+
+    const order = parseInt(orderStr) || 0;
+
+    try {
+        await prisma.menuOverlayItem.create({
+            data: { sectionName, label, url, order },
+        });
+        const result = { success: true };
+        storeIdempotency(idempotencyKey, result);
+        revalidatePath("/admin/menu-overlay");
+        revalidatePath("/");
+        return result;
+    } catch {
+        return { error: "Gagal membuat menu" };
+    }
+}
+
+export async function updateMenuOverlayItem(id: number, formData: FormData) {
+    await requireAuth();
+    const sectionName = formData.get("sectionName") as string;
+    const label = formData.get("label") as string;
+    const url = formData.get("url") as string;
+    const orderStr = formData.get("order") as string;
+    const idempotencyKey = formData.get("idempotencyKey") as string;
+
+    if (!sectionName || !label || !url) return { error: "Semua field wajib diisi" };
+    if (!idempotencyKey) return { error: "Terjadi kesalahan sistem (no idempotency key)" };
+
+    const checked = checkIdempotency(idempotencyKey);
+    if (checked) return checked;
+
+    const order = parseInt(orderStr) || 0;
+
+    try {
+        await prisma.menuOverlayItem.update({
+            where: { id },
+            data: { sectionName, label, url, order },
+        });
+        const result = { success: true };
+        storeIdempotency(idempotencyKey, result);
+        revalidatePath("/admin/menu-overlay");
+        revalidatePath("/");
+        return result;
+    } catch {
+        return { error: "Gagal memperbarui menu" };
+    }
+}
+
+export async function deleteMenuOverlayItem(id: number) {
+    await requireAuth();
+    await prisma.menuOverlayItem.delete({ where: { id } });
+    revalidatePath("/admin/menu-overlay");
+    revalidatePath("/");
+}

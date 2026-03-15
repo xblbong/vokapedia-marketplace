@@ -13,6 +13,8 @@ import {
     createTeamMember, deleteTeamMember,
     createKategoriBerita, updateKategoriBerita, deleteKategoriBerita,
     createBerita, updateBerita, deleteBerita,
+    createHalaman, updateHalaman, deleteHalaman,
+    createMenuOverlayItem, updateMenuOverlayItem, deleteMenuOverlayItem,
 } from "@/src/lib/admin-actions";
 
 // ==================== TYPES ====================
@@ -31,7 +33,7 @@ interface FormField {
 }
 
 interface Props {
-    type: "product" | "startup" | "category" | "program-studi" | "user" | "team-member" | "kategori-berita" | "berita";
+    type: "product" | "startup" | "category" | "program-studi" | "user" | "team-member" | "kategori-berita" | "berita" | "halaman" | "menu-overlay";
     data: Record<string, unknown>[];
     columns: string[];
     columnLabels: string[];
@@ -50,6 +52,8 @@ const deleteActions: Record<string, (id: number) => Promise<unknown>> = {
     "team-member": deleteTeamMember,
     "kategori-berita": deleteKategoriBerita,
     berita: deleteBerita,
+    halaman: deleteHalaman,
+    "menu-overlay": deleteMenuOverlayItem,
 };
 
 const createActions: Record<string, (formData: FormData) => Promise<unknown>> = {
@@ -61,6 +65,8 @@ const createActions: Record<string, (formData: FormData) => Promise<unknown>> = 
     "team-member": createTeamMember,
     "kategori-berita": createKategoriBerita,
     berita: createBerita,
+    halaman: createHalaman,
+    "menu-overlay": createMenuOverlayItem,
 };
 
 const updateActions: Record<string, (id: number, formData: FormData) => Promise<unknown>> = {
@@ -70,6 +76,8 @@ const updateActions: Record<string, (id: number, formData: FormData) => Promise<
     "program-studi": updateProgramStudi,
     "kategori-berita": updateKategoriBerita,
     berita: updateBerita,
+    halaman: updateHalaman,
+    "menu-overlay": updateMenuOverlayItem,
 };
 
 // ==================== HELPERS ====================

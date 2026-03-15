@@ -167,3 +167,24 @@ model Berita {
 
   kategori        KategoriBerita @relation(fields: [kategoriId], references: [id])
 }
+
+// ==================== HALAMAN STATIS (PAGES) ====================
+
+model Halaman {
+  id          Int      @id @default(autoincrement())
+  title       String
+  slug        String   @unique
+  content     String   
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ==================== MENU OVERLAY ====================
+
+model MenuOverlayItem {
+  id          Int      @id @default(autoincrement())
+  sectionName String   
+  label       String   
+  url         String   
+  order       Int      @default(0)
+}

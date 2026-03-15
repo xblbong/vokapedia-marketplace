@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import Pagination from "@/src/components/Pagination/Pagination";
 import { StartupCard } from "@/src/components/StartupCard/StartupCard";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 interface ProfilStartupProps {
     startups: {
@@ -12,14 +12,23 @@ interface ProfilStartupProps {
         description: string;
         teamPhotos: string[];
     }[];
+    currentPage: number;
+    totalPages: number;
 }
 
-export default function ProfilStartupPage({ startups }: ProfilStartupProps) {
-    const [currentPage, setCurrentPage] = useState(1);
-    const totalPages = 3;
+export default function ProfilStartupPage({ startups, currentPage, totalPages }: ProfilStartupProps) {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const pathname = usePathname();
+
+    const handlePageChange = (page: number) => {
+        const current = new URLSearchParams(Array.from(searchParams.entries()));
+        current.set("page", page.toString());
+        router.push(`${pathname}?${current.toString()}`, { scroll: true });
+    };
 
     return (
-        <div className="layout-container mt-24 px-4 py-10">
+        <div className="layout-container mt-24 px-4 pt-10 pb-20">
             <h1 className="text-[24px] font-bold mb-8 text-[#1E1E1E]">Profil Startup</h1>
 
             {/* Responsive Grid System */}
@@ -29,14 +38,16 @@ export default function ProfilStartupPage({ startups }: ProfilStartupProps) {
                 ))}
             </div>
 
-            {/* Pagination (Opsional) */}
-            <div className="flex justify-center mt-12 gap-2">
-                <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={(page) => setCurrentPage(page)}
-                />
-            </div>
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className="flex justify-center mt-12 gap-2">
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={handlePageChange}
+                    />
+                </div>
+            )}
         </div>
     );
 }

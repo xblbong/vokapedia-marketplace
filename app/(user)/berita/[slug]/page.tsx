@@ -46,7 +46,7 @@ export default async function BeritaDetailPage({
             {/* Content Body */}
             <article className="layout-container py-10 md:py-16">
                 <div className="max-w-[800px] mx-auto bg-white rounded-2xl md:rounded-[24px] shadow-sm border border-gray-100 overflow-hidden">
-                    
+
                     {/* Header Article */}
                     <div className="p-6 md:p-10 border-b border-gray-100">
                         <div className="flex items-center gap-3 mb-6 flex-wrap">
@@ -89,7 +89,7 @@ export default async function BeritaDetailPage({
 
                     {/* Article Content */}
                     <div className="p-6 md:p-10">
-                        <div 
+                        <div
                             className="prose prose-lg max-w-none text-[#4B5563] leading-[1.8] md:leading-[2] text-[16px] md:text-[18px] whitespace-pre-line"
                             dangerouslySetInnerHTML={{ __html: berita.isi_berita }}
                         />

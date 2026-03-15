@@ -8,7 +8,11 @@ import { USER_NAV_LINKS } from "@/src/components/constants/navigation";
 import OverlayMenu from "./OverlayMenu";
 import { useDebounce } from "@/src/hooks/useDebounce";
 
-export default function NavbarComponent() {
+interface NavbarProps {
+  overlayMenu?: { title: string, items: { label: string, href: string }[] }[];
+}
+
+export default function NavbarComponent({ overlayMenu = [] }: NavbarProps) {
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
@@ -24,40 +28,40 @@ export default function NavbarComponent() {
 
   // Sync state dengan URL (bila user back/forward atau direct url)
   useEffect(() => {
-     setSearchTerm(searchParams.get("q") || "");
+    setSearchTerm(searchParams.get("q") || "");
   }, [searchParams]);
 
   // Push URL perubahan query otomatis ketika user selesai mengetik (debounce)
   useEffect(() => {
-      // Pastikan hanya route jika isi search term berubah dari nilai param saat ini
-      const currentParam = searchParams.get("q") || "";
-      if (debouncedSearchTerm !== currentParam) {
-          const url = new URL("/produk", window.location.href);
-          
-          // Jika sudah di halaman produk, pertahankan filter prodi/kategori
-          if (pathname === "/produk") {
-              searchParams.forEach((val, key) => {
-                  if (key !== "q" && key !== "page") url.searchParams.set(key, val);
-              });
-          }
+    // Pastikan hanya route jika isi search term berubah dari nilai param saat ini
+    const currentParam = searchParams.get("q") || "";
+    if (debouncedSearchTerm !== currentParam) {
+      const url = new URL("/produk", window.location.href);
 
-          if (debouncedSearchTerm) {
-              url.searchParams.set("q", debouncedSearchTerm);
-          } else {
-              url.searchParams.delete("q");
-          }
-          
-          // Reset page ke-1 setiap kali ada pencarian baru
-          url.searchParams.delete("page");
-
-          router.push(url.pathname + url.search);
+      // Jika sudah di halaman produk, pertahankan filter prodi/kategori
+      if (pathname === "/produk") {
+        searchParams.forEach((val, key) => {
+          if (key !== "q" && key !== "page") url.searchParams.set(key, val);
+        });
       }
+
+      if (debouncedSearchTerm) {
+        url.searchParams.set("q", debouncedSearchTerm);
+      } else {
+        url.searchParams.delete("q");
+      }
+
+      // Reset page ke-1 setiap kali ada pencarian baru
+      url.searchParams.delete("page");
+
+      router.push(url.pathname + url.search);
+    }
   }, [debouncedSearchTerm, pathname, router, searchParams]);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-40 bg-white">
       {/* Main Navbar Section */}
-      <div className="layout-container nav-shadow px-4 md:px-10 lg:px-24 py-3 md:py-5 flex items-center justify-between min-h-[64px] md:min-h-[80px]">
+      <div className="nav-shadow px-4 md:px-10 lg:px-24 py-3 md:py-5 flex items-center justify-between min-h-[64px] md:min-h-[80px]">
 
         {/* Left: Logo & Search Bar */}
         <div className="flex items-center gap-6 lg:gap-10 flex-1">
@@ -137,7 +141,7 @@ export default function NavbarComponent() {
       )}
 
       {/* Overlay Navigation Menu */}
-      <OverlayMenu isOpen={isOverlayOpen} onClose={() => setIsOverlayOpen(false)} />
+      <OverlayMenu isOpen={isOverlayOpen} onClose={() => setIsOverlayOpen(false)} menuData={overlayMenu} />
     </nav>
   );
 }
