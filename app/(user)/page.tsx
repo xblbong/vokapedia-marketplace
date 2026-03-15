@@ -3,6 +3,7 @@ import BikTefaSection from "@/src/views/home/BikTefaSection";
 import HeroSection from "@/src/views/home/HeroSection";
 import ProductSection from "@/src/views/home/ProductSection";
 import ProgramStudi from "@/src/views/home/ProgramStudi";
+import BeritaSection from "@/src/views/home/BeritaSection";
 import { prisma } from "@/src/lib/prisma";
 
 export default async function HomePage() {
@@ -40,13 +41,69 @@ export default async function HomePage() {
   const kategoriList = rawKategoris.map((c) => c.name);
   const prodiList = rawProgramStudis.map((p) => p.name);
 
+  // Fetch Hero Slider
+  const heroSlidesData = await prisma.berita.findMany({
+    where: { status: "PUBLISHED", is_slider: true },
+    orderBy: { createdAt: "desc" },
+    take: 5,
+    include: { kategori: true }
+  });
+
+  const heroSlides = heroSlidesData.map(b => ({
+    id: b.id.toString(),
+    tagline: b.kategori?.name || "Berita Terbaru",
+    title: b.judul,
+    description: b.isi_berita,
+    image: b.gambar ? b.gambar.split(",")[0] : "/images/svg/background.svg",
+    link: `/berita/${b.slug}`
+  }));
+
+  // Fetch Berita Sections
+  const beritaTerbaruData = await prisma.berita.findMany({
+    where: { status: "PUBLISHED", section_type: "TERBARU" },
+    orderBy: { createdAt: "desc" },
+    take: 4,
+    include: { kategori: true }
+  });
+
+  const mapBerita = (data: typeof beritaTerbaruData) => data.map(b => ({
+    slug: b.slug,
+    judul: b.judul,
+    isi_berita: b.isi_berita,
+    gambar: b.gambar ? b.gambar.split(",")[0] : "/images/svg/background.svg",
+    section_type: b.section_type,
+    tanggal: b.createdAt.toLocaleDateString("id-ID", { year: 'numeric', month: 'long', day: 'numeric' }),
+    kategori: b.kategori?.name || "Informasi"
+  }));
+
+  const beritaTerbaru = mapBerita(beritaTerbaruData);
+
+  const beritaProgramData = await prisma.berita.findMany({
+    where: { status: "PUBLISHED", section_type: "PROGRAM" },
+    orderBy: { createdAt: "desc" },
+    take: 4,
+    include: { kategori: true }
+  });
+  const beritaProgram = mapBerita(beritaProgramData);
+
+  const beritaTefaData = await prisma.berita.findMany({
+    where: { status: "PUBLISHED", section_type: "TEACHING_FACTORY" },
+    orderBy: { createdAt: "desc" },
+    take: 4,
+    include: { kategori: true }
+  });
+  const beritaTefa = mapBerita(beritaTefaData);
+
   return (
-    <div className="space-y-20">
-      <HeroSection />
+    <div className="space-y-32">
+      <HeroSection slides={heroSlides} />
       <ProductSection products={products} prodiList={prodiList} kategoriList={kategoriList} />
       <AboutSection />
+      {beritaProgram.length > 0 && <BeritaSection title="Program & Agenda Vokasi" berita={beritaProgram} />}
       <ProgramStudi programStudis={programStudis} />
       <BikTefaSection />
+      <BeritaSection title="Berita Penawaran Terbaru" berita={beritaTerbaru} />
+      {beritaTefa.length > 0 && <BeritaSection title="Update Teaching Factory" berita={beritaTefa} />}
     </div>
   );
 }

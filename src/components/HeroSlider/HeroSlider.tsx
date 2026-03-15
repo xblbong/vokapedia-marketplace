@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 interface SlideData {
-  id: number;
+  id: string; // Changed to string
   tagline: string;
   title: string;
   description: string;
@@ -12,56 +12,31 @@ interface SlideData {
   link: string;
 }
 
-const DUMMY_DATA: SlideData[] = [
-  {
-    id: 1,
-    tagline: "Berita Terkini",
-    title: "Opening Brawijaya University Education Expo 2026",
-    description: "Menandai pembukaan resmi rangkaian kegiatan Brawijaya University Education Expo 2026 yang mempertemukan sivitas akademika, mitra, dan calon mahasiswa.",
-    image: "/images/svg/background.svg",
-    link: "/berita/1",
-  },
-  {
-    id: 2,
-    tagline: "Info Kampus",
-    title: "Vokasi UB Raih Penghargaan Startup Inovatif 2025",
-    description: "Prestasi gemilang kembali ditorehkan oleh mahasiswa vokasi dalam ajang nasional tahunan yang diadakan di Jakarta kemarin malam.",
-    image: "/images/png/test.jpg",
-    link: "/berita/2",
-  },
-  {
-    id: 3,
-    tagline: "Agenda",
-    title: "Workshop Kewirausahaan Digital untuk Mahasiswa",
-    description: "Ikuti rangkaian workshop intensif untuk mengasah skill bisnis digital kamu bersama mentor ahli dari berbagai startup ternama.",
-    image: "/images/png/test2.jpeg",
-    link: "/berita/3",
-  },
-  {
-    id: 4,
-    tagline: "Info Kampus",
-    title: "Vokasi UB Raih Penghargaan Startup Inovatif 2025",
-    description: "Prestasi gemilang kembali ditorehkan oleh mahasiswa vokasi dalam ajang nasional tahunan yang diadakan di Jakarta kemarin malam.",
-    image: "/images/png/test.jpg",
-    link: "/berita/4",
-  },
-];
+interface HeroSliderProps {
+  slides: SlideData[];
+}
 
-export default function HeroSlider() {
+export default function HeroSlider({ slides }: HeroSliderProps) {
   const [current, setCurrent] = useState(0);
 
+  // Fallback to empty if no slides
+  const displaySlides = slides && slides.length > 0 ? slides : [];
+
   useEffect(() => {
+    if (displaySlides.length <= 1) return;
     const timer = setInterval(() => {
-      setCurrent((prev) => (prev === DUMMY_DATA.length - 1 ? 0 : prev + 1));
-    }, 3000);
+      setCurrent((prev) => (prev === displaySlides.length - 1 ? 0 : prev + 1));
+    }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [displaySlides.length]);
+
+  if (displaySlides.length === 0) return null;
 
   return (
     <section className="w-full flex flex-col items-center gap-6 md:gap-[32px] mt-40 md:mt-40 lg:mt-[12rem] px-4 md:px-10 lg:px-0">
       
       <div className="relative w-full max-w-[1240px] h-[350px] sm:h-[400px] md:h-[488px] overflow-hidden rounded-[16px] md:rounded-[20px] shadow-lg">
-        {DUMMY_DATA.map((slide, index) => (
+        {displaySlides.map((slide, index) => (
           <div
             key={slide.id}
             className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
@@ -117,8 +92,8 @@ export default function HeroSlider() {
         ))}
       </div>
 
-      <div className="flex gap-2 md:gap-[12px]">
-        {DUMMY_DATA.map((_, i) => (
+      <div className="flex gap-2 md:gap-[12px] z-20">
+        {displaySlides.map((_, i) => (
           <button
             key={i}
             onClick={() => setCurrent(i)}

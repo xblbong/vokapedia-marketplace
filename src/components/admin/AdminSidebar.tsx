@@ -15,14 +15,18 @@ import {
     ChevronLeft,
     ChevronRight,
     ClipboardList,
+    Newspaper,
+    BookOpen,
 } from "lucide-react";
 import Image from "next/image";
 
 const MENU_ITEMS = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+    { name: "Manajemen Berita", href: "/admin/berita", icon: Newspaper },
+    { name: "Kategori Berita", href: "/admin/kategori-berita", icon: BookOpen },
     { name: "Produk", href: "/admin/products", icon: Package },
     { name: "Startup", href: "/admin/startups", icon: Building2 },
-    { name: "Kategori", href: "/admin/categories", icon: Tag },
+    { name: "Kategori Produk", href: "/admin/categories", icon: Tag },
     { name: "Program Studi", href: "/admin/program-studi", icon: GraduationCap },
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Rekap Startup", href: "/admin/recap-startups", icon: ClipboardList },

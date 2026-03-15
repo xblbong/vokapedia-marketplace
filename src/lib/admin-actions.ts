@@ -521,3 +521,181 @@ export async function deleteUser(id: number) {
     revalidatePath("/admin/users");
     return { success: true };
 }
+
+// ==================== KATEGORI BERITA ====================
+
+export async function createKategoriBerita(formData: FormData) {
+    await requireAuth();
+
+    const idempotencyKey = formData.get("idempotencyKey") as string | null;
+    const { isDuplicate, cachedResult } = checkIdempotency(idempotencyKey);
+    if (isDuplicate) return cachedResult;
+
+    const name = (formData.get("name") as string || "").trim();
+    if (!name) return { error: "Nama kategori berita wajib diisi" };
+
+    const existing = await prisma.kategoriBerita.findFirst({
+        where: { name: { equals: name, mode: "insensitive" } },
+    });
+    if (existing) return { error: "Nama kategori berita sudah terdaftar." };
+
+    await prisma.kategoriBerita.create({ data: { name } });
+    const result = { success: true };
+    storeIdempotency(idempotencyKey, result);
+    revalidatePath("/admin/kategori-berita");
+    return result;
+}
+
+export async function updateKategoriBerita(id: number, formData: FormData) {
+    await requireAuth();
+
+    const idempotencyKey = formData.get("idempotencyKey") as string | null;
+    const { isDuplicate, cachedResult } = checkIdempotency(idempotencyKey);
+    if (isDuplicate) return cachedResult;
+
+    const name = (formData.get("name") as string || "").trim();
+    if (!name) return { error: "Nama kategori berita wajib diisi" };
+
+    const existing = await prisma.kategoriBerita.findFirst({
+        where: {
+            name: { equals: name, mode: "insensitive" },
+            id: { not: id },
+        },
+    });
+    if (existing) return { error: "Nama kategori berita sudah terdaftar." };
+
+    await prisma.kategoriBerita.update({ where: { id }, data: { name } });
+    const result = { success: true };
+    storeIdempotency(idempotencyKey, result);
+    revalidatePath("/admin/kategori-berita");
+    return result;
+}
+
+export async function deleteKategoriBerita(id: number) {
+    await requireAuth();
+    await prisma.kategoriBerita.delete({ where: { id } });
+    revalidatePath("/admin/kategori-berita");
+}
+
+// ==================== BERITA ====================
+
+export async function createBerita(formData: FormData) {
+    await requireAuth();
+
+    const idempotencyKey = formData.get("idempotencyKey") as string | null;
+    const { isDuplicate, cachedResult } = checkIdempotency(idempotencyKey);
+    if (isDuplicate) return cachedResult;
+
+    const judul = (formData.get("judul") as string || "").trim();
+    const isi_berita = (formData.get("isi_berita") as string || "").trim();
+    const gambar = (formData.get("gambar") as string || "");
+    const kategoriId = parseInt(formData.get("kategoriId") as string);
+    const section_typeRaw = (formData.get("section_type") as string || "TERBARU");
+    const statusRaw = (formData.get("status") as string || "DRAFT");
+    const tags = (formData.get("tags") as string || "").trim();
+
+    const errors: string[] = [];
+    if (!judul) errors.push("Ups! Judul berita belum diisi");
+    if (!isi_berita) errors.push("Isi berita wajib diisi");
+    if (!kategoriId || isNaN(kategoriId)) errors.push("Kategori berita wajib dipilih");
+    if (errors.length > 0) return { error: errors.join(". ") };
+
+    const slug = judul.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") + "-" + Date.now().toString().slice(-4);
+    
+    // Validasi enum
+    const section_type = ["TERBARU", "PROGRAM", "TEACHING_FACTORY"].includes(section_typeRaw) ? section_typeRaw : "TERBARU";
+    const status = ["DRAFT", "PUBLISHED"].includes(statusRaw) ? statusRaw : "DRAFT";
+
+    const isSliderVal = typeof formData.get("is_slider") === "string" ? formData.get("is_slider") === "true" : Boolean(formData.get("is_slider"));
+
+    try {
+        await prisma.berita.create({
+            data: {
+                judul,
+                slug,
+                isi_berita,
+                gambar,
+                is_slider: isSliderVal,
+                section_type: section_type as "TERBARU" | "PROGRAM" | "TEACHING_FACTORY",
+                status: status as "DRAFT" | "PUBLISHED",
+                tags,
+                kategoriId,
+            },
+        });
+        const result = { success: true };
+        storeIdempotency(idempotencyKey, result);
+        revalidatePath("/admin/berita");
+        revalidatePath("/");
+        return result;
+    } catch (err) {
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+            return { error: "Berita dengan judul ini mungkin sudah ada (slug duplikat)" };
+        }
+        return { error: "Gagal menyimpan berita" };
+    }
+}
+
+export async function updateBerita(id: number, formData: FormData) {
+    await requireAuth();
+
+    const idempotencyKey = formData.get("idempotencyKey") as string | null;
+    const { isDuplicate, cachedResult } = checkIdempotency(idempotencyKey);
+    if (isDuplicate) return cachedResult;
+
+    const judul = (formData.get("judul") as string || "").trim();
+    const isi_berita = (formData.get("isi_berita") as string || "").trim();
+    const gambar = (formData.get("gambar") as string || "");
+    const kategoriId = parseInt(formData.get("kategoriId") as string);
+    const section_typeRaw = (formData.get("section_type") as string || "TERBARU");
+    const statusRaw = (formData.get("status") as string || "DRAFT");
+    const tags = (formData.get("tags") as string || "").trim();
+
+    const errors: string[] = [];
+    if (!judul) errors.push("Ups! Judul berita belum diisi");
+    if (!isi_berita) errors.push("Isi berita wajib diisi");
+    if (!kategoriId || isNaN(kategoriId)) errors.push("Kategori berita wajib dipilih");
+    if (errors.length > 0) return { error: errors.join(". ") };
+
+    const slug = judul.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""); // Not adding timestamp on update unless necessary, but Prisma 2002 catches dupes
+    
+    const section_type = ["TERBARU", "PROGRAM", "TEACHING_FACTORY"].includes(section_typeRaw) ? section_typeRaw : "TERBARU";
+    const status = ["DRAFT", "PUBLISHED"].includes(statusRaw) ? statusRaw : "DRAFT";
+
+    const isSliderVal = typeof formData.get("is_slider") === "string" ? formData.get("is_slider") === "true" : Boolean(formData.get("is_slider"));
+
+    try {
+        await prisma.berita.update({
+            where: { id },
+            data: {
+                judul,
+                // Don't update slug to prevent 404s on existing shared links, or maybe update if asked. Let's keep existing slug logic or let it update (can cause duplicates if changed to existing)
+                // We'll update slug if and only if valid, but better to just skip slug update to be safe, or do it with fallback. Let's just update as is. Prisma will throw 2002 on dupe.
+                slug,
+                isi_berita,
+                gambar,
+                is_slider: isSliderVal,
+                section_type: section_type as "TERBARU" | "PROGRAM" | "TEACHING_FACTORY",
+                status: status as "DRAFT" | "PUBLISHED",
+                tags,
+                kategoriId,
+            },
+        });
+        const result = { success: true };
+        storeIdempotency(idempotencyKey, result);
+        revalidatePath("/admin/berita");
+        revalidatePath("/");
+        return result;
+    } catch(err) {
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+            return { error: "Berita dengan judul ini mungkin sudah ada (slug duplikat)" };
+        }
+        return { error: "Gagal memperbarui berita" };
+    }
+}
+
+export async function deleteBerita(id: number) {
+    await requireAuth();
+    await prisma.berita.delete({ where: { id } });
+    revalidatePath("/admin/berita");
+    revalidatePath("/");
+}

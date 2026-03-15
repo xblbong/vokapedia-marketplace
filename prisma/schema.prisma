@@ -131,3 +131,39 @@ model ButtonClick {
   product   Product?   @relation("ProductClicks", fields: [productId], references: [id], onDelete: Cascade)
   startup   Startup?   @relation("StartupClicks", fields: [startupId], references: [id], onDelete: Cascade)
 }
+
+// ==================== BERITA & KONTEN ====================
+
+model KategoriBerita {
+  id       Int      @id @default(autoincrement())
+  name     String   @unique
+  berita   Berita[]
+}
+
+enum SectionType {
+  TERBARU
+  PROGRAM
+  TEACHING_FACTORY
+}
+
+enum BeritaStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model Berita {
+  id              Int            @id @default(autoincrement())
+  slug            String         @unique
+  judul           String
+  isi_berita      String
+  gambar          String         @default("")
+  is_slider       Boolean        @default(false)
+  section_type    SectionType    @default(TERBARU)
+  status          BeritaStatus   @default(PUBLISHED)
+  tags            String         @default("")
+  kategoriId      Int
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  kategori        KategoriBerita @relation(fields: [kategoriId], references: [id])
+}

@@ -11,6 +11,8 @@ import {
     createProgramStudi, updateProgramStudi, deleteProgramStudi,
     createUser, deleteUser,
     createTeamMember, deleteTeamMember,
+    createKategoriBerita, updateKategoriBerita, deleteKategoriBerita,
+    createBerita, updateBerita, deleteBerita,
 } from "@/src/lib/admin-actions";
 
 // ==================== TYPES ====================
@@ -29,7 +31,7 @@ interface FormField {
 }
 
 interface Props {
-    type: "product" | "startup" | "category" | "program-studi" | "user" | "team-member";
+    type: "product" | "startup" | "category" | "program-studi" | "user" | "team-member" | "kategori-berita" | "berita";
     data: Record<string, unknown>[];
     columns: string[];
     columnLabels: string[];
@@ -46,6 +48,8 @@ const deleteActions: Record<string, (id: number) => Promise<unknown>> = {
     "program-studi": deleteProgramStudi,
     user: deleteUser,
     "team-member": deleteTeamMember,
+    "kategori-berita": deleteKategoriBerita,
+    berita: deleteBerita,
 };
 
 const createActions: Record<string, (formData: FormData) => Promise<unknown>> = {
@@ -55,6 +59,8 @@ const createActions: Record<string, (formData: FormData) => Promise<unknown>> = 
     "program-studi": createProgramStudi,
     user: createUser,
     "team-member": createTeamMember,
+    "kategori-berita": createKategoriBerita,
+    berita: createBerita,
 };
 
 const updateActions: Record<string, (id: number, formData: FormData) => Promise<unknown>> = {
@@ -62,6 +68,8 @@ const updateActions: Record<string, (id: number, formData: FormData) => Promise<
     startup: updateStartup,
     category: updateCategory,
     "program-studi": updateProgramStudi,
+    "kategori-berita": updateKategoriBerita,
+    berita: updateBerita,
 };
 
 // ==================== HELPERS ====================
@@ -92,11 +100,11 @@ const PRODUCT_EXTENSIONS = [".png", ".jpg", ".jpeg", ".svg"];
 const PROFILE_EXTENSIONS = [".png", ".jpg", ".jpeg"];
 
 function getFileConfig(field: FormField) {
-    if (field.name === "image") {
+    if (field.name === "image" || field.name === "gambar") {
         return {
-            maxSize: DEFAULT_MAX_FILE_SIZE,
-            allowedExtensions: PRODUCT_EXTENSIONS,
-            helperText: 'Format: JPG, PNG, SVG. Ukuran: 420x315px (4:3). Max 300KB.',
+            maxSize: 2 * 1024 * 1024, // updated to 2MB as per PRD for Berita
+            allowedExtensions: PRODUCT_EXTENSIONS.includes(".webp") ? PRODUCT_EXTENSIONS : [...PRODUCT_EXTENSIONS, ".webp"],
+            helperText: 'Format: JPG, PNG, WEBP, SVG. Max 2MB.',
         };
     }
 
