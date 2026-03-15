@@ -44,7 +44,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     category: p.category?.name || formattedStartup.category,
     description: p.description,
     price: Number(p.price) || 0,
-    image: p.image || "/images/svg/product1.svg",
+    image: p.image ? p.image.split(",")[0] : "/images/svg/product1.svg",
   }));
   
   return (

@@ -1,5 +1,6 @@
 import NavbarComponent from "@/src/components/layouts/NavbarComponent";
 import Footer from "@/src/components/layouts/Footer";
+import { Suspense } from "react";
 
 export default function UserLayout({
     children,
@@ -8,7 +9,9 @@ export default function UserLayout({
 }) {
     return (
         <>
-            <NavbarComponent />
+            <Suspense fallback={null}>
+                <NavbarComponent />
+            </Suspense>
             {children}
             <Footer />
         </>

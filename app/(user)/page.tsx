@@ -22,10 +22,11 @@ export default async function HomePage() {
   const products = rawProducts.map((p) => ({
     id: p.id.toString(),
     title: p.title,
-    category: p.startup?.programStudi?.name || p.category?.name || "Lainnya",
+    category: p.startup?.programStudi?.name || "Lainnya",
+    kategori: p.category?.name || "Lainnya",
     description: p.description,
     price: Number(p.price) || 0,
-    image: p.image || "/images/svg/product1.svg",
+    image: p.image ? p.image.split(",")[0] : "/images/svg/product1.svg",
   }));
 
   const rawProgramStudis = await prisma.programStudi.findMany();
@@ -35,10 +36,14 @@ export default async function HomePage() {
     icon: p.icon || "/images/svg/icons/ti.svg",
   }));
 
+  const rawKategoris = await prisma.category.findMany();
+  const kategoriList = rawKategoris.map((c) => c.name);
+  const prodiList = rawProgramStudis.map((p) => p.name);
+
   return (
     <div className="space-y-20">
       <HeroSection />
-      <ProductSection products={products} />
+      <ProductSection products={products} prodiList={prodiList} kategoriList={kategoriList} />
       <AboutSection />
       <ProgramStudi programStudis={programStudis} />
       <BikTefaSection />

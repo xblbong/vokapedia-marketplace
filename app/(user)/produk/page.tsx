@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import ProductSection from "@/src/views/product/ProductSection";
 import { prisma } from "@/src/lib/prisma";
 
@@ -95,23 +96,25 @@ export default async function ProdukPage({
         category: p.startup?.programStudi?.name || p.category?.name || "Lainnya",
         description: p.description,
         price: Number(p.price) || 0,
-        image: p.image || "/images/svg/product1.svg",
+        image: p.image ? p.image.split(",")[0] : "/images/svg/product1.svg",
     }));
 
     const totalPages = Math.ceil(totalCount / limit) || 1;
 
     return (
-        <ProductSection 
-            products={products} 
-            totalPages={totalPages}
-            currentPage={page}
-            totalItems={totalCount}
-            filters={{
-                prodiList,
-                kategoriList,
-                activeProdi: prodi || "Semua",
-                activeKategori: kategori || "Semua"
-            }}
-        />
+        <Suspense fallback={<div className="min-h-[50vh] flex items-center justify-center">Memuat produk...</div>}>
+            <ProductSection 
+                products={products} 
+                totalPages={totalPages}
+                currentPage={page}
+                totalItems={totalCount}
+                filters={{
+                    prodiList,
+                    kategoriList,
+                    activeProdi: prodi || "Semua",
+                    activeKategori: kategori || "Semua"
+                }}
+            />
+        </Suspense>
     );
 }

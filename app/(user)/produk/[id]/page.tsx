@@ -55,7 +55,7 @@ export default async function ProductDetailPage({
         title: rawProduct.title,
         description: rawProduct.description,
         price: Number(rawProduct.price) || 0,
-        images: [rawProduct.image || "/images/svg/product1.svg"],
+        images: rawProduct.image ? rawProduct.image.split(",") : ["/images/svg/product1.svg"],
         ecommerceUrl: rawProduct.ecommerceUrl || "#",
         whatsappUrl: "#" // Default if not in DB
     };
@@ -77,7 +77,7 @@ export default async function ProductDetailPage({
         category: p.category?.name || p.startup?.programStudi?.name || "Lainnya",
         description: p.description,
         price: Number(p.price) || 0,
-        image: p.image || "/images/svg/product1.svg",
+        image: p.image ? p.image.split(",")[0] : "/images/svg/product1.svg",
     }));
 
     return (
