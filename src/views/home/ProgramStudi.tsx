@@ -1,35 +1,15 @@
 "use client";
 import Image from "next/image";
 
-const PRODI_DATA = [
-  {
-    title: "Teknologi Informasi",
-    desc: "Berfokus pada layanan hospitality, pengelolaan usaha kuliner, pariwisata, dan pengalaman pelanggan berbasis standar industri.",
-    icon: "/images/svg/icons/ti.svg",
-  },
-  {
-    title: "Administrasi Bisnis",
-    desc: "Berfokus pada layanan hospitality, pengelolaan usaha kuliner, pariwisata, dan pengalaman pelanggan berbasis standar industri.",
-    icon: "/images/svg/icons/adbis.svg",
-  },
-  {
-    title: "Keuangan & Perbankan",
-    desc: "Berfokus pada layanan hospitality, pengelolaan usaha kuliner, pariwisata, dan pengalaman pelanggan berbasis standar industri.",
-    icon: "/images/svg/icons/keubank.svg",
-  },
-  {
-    title: "Manajemen Perhotelan",
-    desc: "Berfokus pada layanan hospitality, pengelolaan usaha kuliner, pariwisata, dan pengalaman pelanggan berbasis standar industri.",
-    icon: "/images/svg/icons/mp.svg",
-  },
-  {
-    title: "Desain Grafis",
-    desc: "Berfokus pada layanan hospitality, pengelolaan usaha kuliner, pariwisata, dan pengalaman pelanggan berbasis standar industri.",
-    icon: "/images/svg/icons/dg.svg",
-  },
-];
+interface ProgramStudiProps {
+  programStudis: {
+    title: string;
+    desc: string;
+    icon: string;
+  }[];
+}
 
-export default function ProgramStudi() {
+export default function ProgramStudi({ programStudis }: ProgramStudiProps) {
   return (
     <section className="layout-container py-12 md:py-20 flex flex-col items-center gap-10 md:gap-[60px]">
       
@@ -45,7 +25,7 @@ export default function ProgramStudi() {
 
       {/* Cards Container: Menggunakan Grid untuk kontrol jumlah kolom yang presisi */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 md:gap-[24px] w-full">
-        {PRODI_DATA.map((prodi, index) => (
+        {programStudis.map((prodi, index) => (
           <div 
             key={index}
             className="w-full h-auto min-h-[200px] bg-white border border-[#C3C3C3] rounded-[20px] p-6 flex flex-col items-center text-center gap-4 md:gap-[20px] hover:border-black hover:shadow-xl transition-all duration-300 group cursor-default"

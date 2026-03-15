@@ -3,32 +3,31 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import Image from "next/image";
 
-const PROGRAM_STUDI = [
-  { name: "Semua", count: 20 },
-  { name: "Teknologi Informasi", count: 8 },
-  { name: "Administrasi Bisnis", count: 5 },
-  { name: "Keuangan & Perbankan", count: 4 },
-  { name: "Manajemen Perhotelan", count: 5 },
-  { name: "Desain Grafis", count: 6 },
-];
+export interface FilterItem {
+  name: string;
+  count: number;
+}
 
-const KATEGORI = [
-  { name: "Semua", count: 20 },
-  { name: "Fashion", count: 6 },
-  { name: "Aksesori", count: 2 },
-  { name: "Kuliner", count: 4 },
-  { name: "Interior & Dekor", count: 5 },
-  { name: "Jasa Kreatif", count: 6 },
-];
+interface FilterSidebarProps {
+  prodiList: FilterItem[];
+  kategoriList: FilterItem[];
+  activeProdi: string;
+  activeKategori: string;
+  onProdiChange: (val: string) => void;
+  onKategoriChange: (val: string) => void;
+}
 
-export default function FilterSidebar() {
+export default function FilterSidebar({
+  prodiList,
+  kategoriList,
+  activeProdi,
+  activeKategori,
+  onProdiChange,
+  onKategoriChange
+}: FilterSidebarProps) {
   // State untuk Dropdown (Buka/Tutup)
   const [isOpenProdi, setIsOpenProdi] = useState(true);
   const [isOpenKategori, setIsOpenKategori] = useState(true);
-
-  // State untuk Filter Aktif
-  const [activeProdi, setActiveProdi] = useState("Semua");
-  const [activeKategori, setActiveKategori] = useState("Semua");
 
   return (
     <aside className="w-full lg:w-[320px] flex flex-col gap-6 antialiased">
@@ -59,10 +58,10 @@ export default function FilterSidebar() {
         {/* List Items - Collapsible with Animation */}
         <div className={`overflow-hidden transition-all duration-300 ${isOpenProdi ? "max-h-[500px] mt-2" : "max-h-0"}`}>
           <div className="flex flex-col bg-white">
-            {PROGRAM_STUDI.map((item, i) => (
+            {prodiList.map((item, i) => (
               <button
                 key={i}
-                onClick={() => setActiveProdi(item.name)}
+                onClick={() => onProdiChange(item.name)}
                 className={`group flex items-center justify-between px-6 py-[14px] text-left transition-all border-b border-gray-100 last:border-none ${
                   activeProdi === item.name
                     ? "border-r-[4px] border-r-[#0062FF] bg-white"
@@ -104,10 +103,10 @@ export default function FilterSidebar() {
         {/* List Items - Collapsible */}
         <div className={`overflow-hidden transition-all duration-300 ${isOpenKategori ? "max-h-[500px] mt-2" : "max-h-0"}`}>
           <div className="flex flex-col bg-white">
-            {KATEGORI.map((item, i) => (
+            {kategoriList.map((item, i) => (
               <button
                 key={i}
-                onClick={() => setActiveKategori(item.name)}
+                onClick={() => onKategoriChange(item.name)}
                 className={`group flex items-center justify-between px-6 py-[14px] text-left transition-all border-b border-gray-100 last:border-none ${
                   activeKategori === item.name
                     ? "border-r-[4px] border-r-[#0062FF] bg-white"

@@ -1,18 +1,58 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { USER_NAV_LINKS } from "@/src/components/constants/navigation";
 import OverlayMenu from "./OverlayMenu";
+import { useDebounce } from "@/src/hooks/useDebounce";
 
 export default function NavbarComponent() {
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   // Konfigurasi Halaman Banner
   const showBanner = pathname === "/";
+
+  // Search Logic
+  const initialQuery = searchParams.get("q") || "";
+  const [searchTerm, setSearchTerm] = useState(initialQuery);
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+  // Sync state dengan URL (bila user back/forward atau direct url)
+  useEffect(() => {
+     setSearchTerm(searchParams.get("q") || "");
+  }, [searchParams]);
+
+  // Push URL perubahan query otomatis ketika user selesai mengetik (debounce)
+  useEffect(() => {
+      // Pastikan hanya route jika isi search term berubah dari nilai param saat ini
+      const currentParam = searchParams.get("q") || "";
+      if (debouncedSearchTerm !== currentParam) {
+          const url = new URL("/produk", window.location.href);
+          
+          // Jika sudah di halaman produk, pertahankan filter prodi/kategori
+          if (pathname === "/produk") {
+              searchParams.forEach((val, key) => {
+                  if (key !== "q" && key !== "page") url.searchParams.set(key, val);
+              });
+          }
+
+          if (debouncedSearchTerm) {
+              url.searchParams.set("q", debouncedSearchTerm);
+          } else {
+              url.searchParams.delete("q");
+          }
+          
+          // Reset page ke-1 setiap kali ada pencarian baru
+          url.searchParams.delete("page");
+
+          router.push(url.pathname + url.search);
+      }
+  }, [debouncedSearchTerm, pathname, router, searchParams]);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-40 bg-white">
@@ -36,6 +76,8 @@ export default function NavbarComponent() {
             <input
               type="text"
               placeholder="Cari startup atau produk..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full h-[44px] xl:h-[48px] pl-5 pr-12 rounded-full border border-[#C3C3C3] focus:outline-none focus:border-[#0062FF] transition-all text-[14px] xl:text-[16px]"
             />
             <div className="absolute right-4 top-1/2 -translate-y-1/2">

@@ -3,15 +3,44 @@ import BikTefaSection from "@/src/views/home/BikTefaSection";
 import HeroSection from "@/src/views/home/HeroSection";
 import ProductSection from "@/src/views/home/ProductSection";
 import ProgramStudi from "@/src/views/home/ProgramStudi";
+import { prisma } from "@/src/lib/prisma";
 
+export default async function HomePage() {
+  const rawProducts = await prisma.product.findMany({
+    take: 6,
+    orderBy: { createdAt: "desc" },
+    include: {
+      category: true,
+      startup: {
+        include: {
+          programStudi: true,
+        },
+      },
+    },
+  });
 
-export default function HomePage() {
+  const products = rawProducts.map((p) => ({
+    id: p.id.toString(),
+    title: p.title,
+    category: p.startup?.programStudi?.name || p.category?.name || "Lainnya",
+    description: p.description,
+    price: Number(p.price) || 0,
+    image: p.image || "/images/svg/product1.svg",
+  }));
+
+  const rawProgramStudis = await prisma.programStudi.findMany();
+  const programStudis = rawProgramStudis.map((p) => ({
+    title: p.name,
+    desc: p.description,
+    icon: p.icon || "/images/svg/icons/ti.svg",
+  }));
+
   return (
     <div className="space-y-20">
       <HeroSection />
-      <ProductSection />
+      <ProductSection products={products} />
       <AboutSection />
-      <ProgramStudi />
+      <ProgramStudi programStudis={programStudis} />
       <BikTefaSection />
     </div>
   );

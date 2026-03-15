@@ -1,5 +1,6 @@
 "use server";
 
+import { Prisma } from "@/src/app/generated/prisma";
 import { prisma } from "@/src/lib/prisma";
 import { requireAuth, requireAdmin, hashPassword } from "@/src/lib/auth";
 import { revalidatePath } from "next/cache";
@@ -9,9 +10,9 @@ import { checkIdempotency, storeIdempotency } from "@/src/lib/idempotency";
 
 function parseRupiah(value: string): number {
     if (!value) return 0;
-    // Strip "Rp", dots, spaces → parse as number
-    const cleaned = value.replace(/[Rp.\s]/g, "").replace(/,/g, ".");
-    return parseFloat(cleaned) || 0;
+    // Hapus semua karakter non-angka, lalu parse sebagai number
+    const cleaned = value.replace(/[^\d]/g, "");
+    return Number(cleaned) || 0;
 }
 
 function countWords(text: string): number {
@@ -43,7 +44,7 @@ export async function createProduct(formData: FormData) {
     if (countWords(description) < 10) errors.push("Deskripsi produk minimal 10 kata");
     const price = parseRupiah(priceRaw);
     if (price <= 0) errors.push("Harga harus lebih dari 0");
-    const stock = parseInt(stockRaw) || 0;
+    const stock = Number(stockRaw) || 0;
     if (stock < 1) errors.push("Stok minimal 1");
     if (!startupId || isNaN(startupId)) errors.push("Startup wajib dipilih");
     if (!categoryId || isNaN(categoryId)) errors.push("Kategori wajib dipilih");
@@ -65,19 +66,42 @@ export async function createProduct(formData: FormData) {
     const data = {
         title,
         description,
-        price,
-        stock,
+        price: Number(price),
+        stock: Number(stock),
         image,
         ecommerceUrl: ecommerceUrlRaw,
-        startupId,
-        categoryId,
+        startupId: Number(startupId),
+        categoryId: Number(categoryId),
     };
 
-    await prisma.product.create({ data });
-    const result = { success: true };
-    storeIdempotency(idempotencyKey, result);
-    revalidatePath("/admin/products");
-    return result;
+    try {
+        await prisma.product.create({ data });
+        const result = { success: true };
+        storeIdempotency(idempotencyKey, result);
+        revalidatePath("/admin/products");
+        return result;
+    } catch (err) {
+        console.dir(err, { depth: null });
+
+        if (err instanceof Prisma.PrismaClientKnownRequestError) {
+            if (err.code === "P2003") {
+                // Foreign key constraint failed (startup/category)
+                return {
+                    error: "Startup atau kategori yang dipilih tidak ditemukan. Silakan pilih ulang dari daftar dan coba lagi.",
+                };
+            }
+
+            if (err.code === "P2002") {
+                return {
+                    error: "Data produk dengan kombinasi yang sama sudah ada. Silakan cek kembali nama atau data produk lain.",
+                };
+            }
+        }
+
+        return {
+            error: "Terjadi masalah saat menyimpan produk ke database. Silakan cek kembali data atau coba beberapa saat lagi.",
+        };
+    }
 }
 
 export async function updateProduct(id: number, formData: FormData) {
@@ -102,7 +126,7 @@ export async function updateProduct(id: number, formData: FormData) {
     if (countWords(description) < 10) errors.push("Deskripsi produk minimal 10 kata");
     const price = parseRupiah(priceRaw);
     if (price <= 0) errors.push("Harga harus lebih dari 0");
-    const stock = parseInt(stockRaw) || 0;
+    const stock = Number(stockRaw) || 0;
     if (stock < 1) errors.push("Stok minimal 1");
     if (!ecommerceUrlRaw) {
         errors.push("Link E-commerce wajib diisi");
@@ -119,19 +143,41 @@ export async function updateProduct(id: number, formData: FormData) {
     const data = {
         title,
         description,
-        price,
-        stock,
+        price: Number(price),
+        stock: Number(stock),
         image,
         ecommerceUrl: ecommerceUrlRaw,
-        startupId,
-        categoryId,
+        startupId: Number(startupId),
+        categoryId: Number(categoryId),
     };
 
-    await prisma.product.update({ where: { id }, data });
-    const result = { success: true };
-    storeIdempotency(idempotencyKey, result);
-    revalidatePath("/admin/products");
-    return result;
+    try {
+        await prisma.product.update({ where: { id }, data });
+        const result = { success: true };
+        storeIdempotency(idempotencyKey, result);
+        revalidatePath("/admin/products");
+        return result;
+    } catch (err) {
+        console.dir(err, { depth: null });
+
+        if (err instanceof Prisma.PrismaClientKnownRequestError) {
+            if (err.code === "P2003") {
+                return {
+                    error: "Startup atau kategori yang dipilih tidak valid atau sudah dihapus. Silakan pilih ulang dari daftar dan coba lagi.",
+                };
+            }
+
+            if (err.code === "P2002") {
+                return {
+                    error: "Data produk dengan kombinasi yang sama sudah ada. Silakan cek kembali nama atau data produk lain.",
+                };
+            }
+        }
+
+        return {
+            error: "Terjadi masalah saat memperbarui produk di database. Silakan cek kembali data atau coba beberapa saat lagi.",
+        };
+    }
 }
 
 export async function deleteProduct(id: number) {
@@ -218,23 +264,55 @@ export async function updateStartup(id: number, formData: FormData) {
     const profileImage = formData.get("profileImage") as string || "";
     const programStudiId = parseInt(formData.get("programStudiId") as string);
 
+    // Team members from JSON
+    const teamMembersJson = formData.get("teamMembers") as string || "[]";
+    let teamMembers: { name: string; role: string; photo: string; instagramUrl: string }[] = [];
+    try {
+        teamMembers = JSON.parse(teamMembersJson);
+    } catch {
+        return { error: "Data anggota tim tidak valid" };
+    }
+
     const errors: string[] = [];
     if (!name) errors.push("Nama startup wajib diisi");
     if (!description) errors.push("Deskripsi wajib diisi");
     if (!programStudiId || isNaN(programStudiId)) errors.push("Program Studi wajib dipilih");
+    if (teamMembers.length < 1) errors.push("Minimal harus ada 1 anggota tim");
+
+    for (let i = 0; i < teamMembers.length; i++) {
+        if (!teamMembers[i].name?.trim()) errors.push(`Nama anggota tim ke-${i + 1} wajib diisi`);
+        if (!teamMembers[i].role?.trim()) errors.push(`Peran anggota tim ke-${i + 1} wajib diisi`);
+    }
+
     if (errors.length > 0) return { error: errors.join(". ") };
 
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-    await prisma.startup.update({
-        where: { id },
-        data: {
-            name,
-            slug,
-            description,
-            bannerImage,
-            profileImage,
-            programStudiId,
-        },
+
+    // Update startup fields + replace all team members
+    await prisma.$transaction(async (tx) => {
+        await tx.startup.update({
+            where: { id },
+            data: {
+                name,
+                slug,
+                description,
+                bannerImage,
+                profileImage,
+                programStudiId,
+            },
+        });
+
+        // Delete existing team members and re-create
+        await tx.teamMember.deleteMany({ where: { startupId: id } });
+        await tx.teamMember.createMany({
+            data: teamMembers.map((m) => ({
+                name: m.name.trim(),
+                role: m.role.trim(),
+                photo: m.photo || "",
+                instagramUrl: m.instagramUrl || null,
+                startupId: id,
+            })),
+        });
     });
 
     const result = { success: true };

@@ -600,8 +600,9 @@ export default function AdminCrudTable({ type, data, columns, columnLabels, form
                     setFieldErrors({});
                     router.refresh();
                 }
-            } catch {
-                setError("Gagal menyimpan data");
+            } catch (err) {
+                console.error("Gagal menyimpan data", err);
+                setError("Maaf, terjadi masalah pada server saat menyimpan data. Silakan cek kembali isian Anda atau coba beberapa saat lagi.");
             }
             setLoading(false);
         });
@@ -641,8 +642,9 @@ export default function AdminCrudTable({ type, data, columns, columnLabels, form
                     setFieldErrors({});
                     router.refresh();
                 }
-            } catch {
-                setError("Gagal mengupdate data");
+            } catch (err) {
+                console.error("Gagal mengupdate data", err);
+                setError("Maaf, terjadi masalah pada server saat memperbarui data. Silakan cek kembali isian Anda atau coba beberapa saat lagi.");
             }
             setLoading(false);
         });

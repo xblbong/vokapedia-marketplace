@@ -4,75 +4,17 @@ import { useState } from "react";
 import Pagination from "@/src/components/Pagination/Pagination";
 import { StartupCard } from "@/src/components/StartupCard/StartupCard";
 
-// Contoh Data Dinamis
-const startupData = [
-    {
-        id: "1",
-        name: "Pop Ame",
-        department: "Desain Grafis",
-        description: "Produk dekoratif olahan limbah tempurung kelapa dengan desain sederhana, dan elegan.",
-        teamPhotos: ["/images/png/a.png", "/images/png/b.png", "/images/png/c.png", "/images/png/d.png"]
-    },
-    {
-        id: "2",
-        name: "Ravière",
-        department: "Desain Grafis",
-        description: "Produk dekoratif olahan limbah tempurung kelapa dengan desain sederhana, dan elegan.",
-        teamPhotos: ["/images/png/a.png", "/images/png/b.png", "/images/png/c.png", "/images/png/d.png"]
-    },
-    {
-        id: "3",
-        name: "Ravière",
-        department: "Desain Grafis",
-        description: "Produk dekoratif olahan limbah tempurung kelapa dengan desain sederhana, dan elegan.",
-        teamPhotos: ["/images/png/a.png", "/images/png/b.png", "/images/png/c.png", "/images/png/d.png"]
-    },
-    {
-        id: "4",
-        name: "Ravière",
-        department: "Desain Grafis",
-        description: "Produk dekoratif olahan limbah tempurung kelapa dengan desain sederhana, dan elegan.",
-        teamPhotos: ["/images/png/a.png", "/images/png/b.png", "/images/png/c.png", "/images/png/d.png"]
-    },
-    {
-        id: "5",
-        name: "Ravière",
-        department: "Desain Grafis",
-        description: "Produk dekoratif olahan limbah tempurung kelapa dengan desain sederhana, dan elegan.",
-        teamPhotos: ["/images/png/a.png", "/images/png/b.png", "/images/png/c.png", "/images/png/d.png"]
-    },
-    {
-        id: "6",
-        name: "Ravière",
-        department: "Desain Grafis",
-        description: "Produk dekoratif olahan limbah tempurung kelapa dengan desain sederhana, dan elegan.",
-        teamPhotos: ["/images/png/a.png", "/images/png/b.png", "/images/png/c.png", "/images/png/d.png"]
-    },
-    {
-        id: "7",
-        name: "Ravière",
-        department: "Desain Grafis",
-        description: "Produk dekoratif olahan limbah tempurung kelapa dengan desain sederhana, dan elegan.",
-        teamPhotos: ["/images/png/a.png", "/images/png/b.png", "/images/png/c.png", "/images/png/d.png"]
-    },
-    {
-        id: "8",
-        name: "Ravière",
-        department: "Desain Grafis",
-        description: "Produk dekoratif olahan limbah tempurung kelapa dengan desain sederhana, dan elegan.",
-        teamPhotos: ["/images/png/a.png", "/images/png/b.png", "/images/png/c.png", "/images/png/d.png"]
-    },
-    {
-        id: "9",
-        name: "Ravière",
-        department: "Desain Grafis",
-        description: "Produk dekoratif olahan limbah tempurung kelapa dengan desain sederhana, dan elegan.",
-        teamPhotos: ["/images/png/a.png", "/images/png/b.png", "/images/png/c.png", "/images/png/d.png"]
-    },
-    // Tambahkan data lainnya...
-];
+interface ProfilStartupProps {
+    startups: {
+        id: string;
+        name: string;
+        department: string;
+        description: string;
+        teamPhotos: string[];
+    }[];
+}
 
-export default function ProfilStartupPage() {
+export default function ProfilStartupPage({ startups }: ProfilStartupProps) {
     const [currentPage, setCurrentPage] = useState(1);
     const totalPages = 3;
 
@@ -82,7 +24,7 @@ export default function ProfilStartupPage() {
 
             {/* Responsive Grid System */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[30px] justify-items-center">
-                {startupData.map((startup) => (
+                {startups.map((startup) => (
                     <StartupCard key={startup.id} startup={startup} />
                 ))}
             </div>

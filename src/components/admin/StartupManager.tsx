@@ -568,21 +568,23 @@ export default function StartupManager({ startups, programStudis }: Props) {
                 borderRadius: 16, overflow: "hidden", background: "#FFFFFF",
                 border: "1px solid #E5E7EB", boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
             }}>
-                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 800 }}>
                     <thead>
                         <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
-                            <th style={{ textAlign: "left", padding: "14px 20px", fontSize: 12, color: "#8F8F8F", fontWeight: 600 }}>#</th>
-                            <th style={{ textAlign: "left", padding: "14px 16px", fontSize: 12, color: "#8F8F8F", fontWeight: 600 }}>Startup</th>
+                            <th style={{ textAlign: "left", padding: "14px 20px", fontSize: 12, color: "#8F8F8F", fontWeight: 600, width: 40 }}>#</th>
+                            <th style={{ textAlign: "left", padding: "14px 16px", fontSize: 12, color: "#8F8F8F", fontWeight: 600, minWidth: 140 }}>Startup</th>
+                            <th style={{ textAlign: "left", padding: "14px 16px", fontSize: 12, color: "#8F8F8F", fontWeight: 600, maxWidth: 200 }}>Deskripsi</th>
                             <th style={{ textAlign: "left", padding: "14px 16px", fontSize: 12, color: "#8F8F8F", fontWeight: 600 }}>Program Studi</th>
-                            <th style={{ textAlign: "left", padding: "14px 16px", fontSize: 12, color: "#8F8F8F", fontWeight: 600 }}>Anggota</th>
-                            <th style={{ textAlign: "left", padding: "14px 16px", fontSize: 12, color: "#8F8F8F", fontWeight: 600 }}>Produk</th>
-                            <th style={{ textAlign: "center", padding: "14px 20px", fontSize: 12, color: "#8F8F8F", fontWeight: 600 }}>Aksi</th>
+                            <th style={{ textAlign: "left", padding: "14px 16px", fontSize: 12, color: "#8F8F8F", fontWeight: 600, minWidth: 180 }}>Anggota Tim</th>
+                            <th style={{ textAlign: "left", padding: "14px 16px", fontSize: 12, color: "#8F8F8F", fontWeight: 600, width: 60 }}>Produk</th>
+                            <th style={{ textAlign: "center", padding: "14px 20px", fontSize: 12, color: "#8F8F8F", fontWeight: 600, width: 130 }}>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         {startups.length === 0 ? (
                             <tr>
-                                <td colSpan={6} style={{ padding: 40, textAlign: "center", color: "#8F8F8F", fontSize: 14 }}>
+                                <td colSpan={7} style={{ padding: 40, textAlign: "center", color: "#8F8F8F", fontSize: 14 }}>
                                     Belum ada data startup
                                 </td>
                             </tr>
@@ -607,8 +609,46 @@ export default function StartupManager({ startups, programStudis }: Props) {
                                         <span style={{ fontSize: 14, fontWeight: 500, color: "#1E1E1E" }}>{s.name}</span>
                                     </div>
                                 </td>
+                                {/* Deskripsi - max 10 kata */}
+                                <td style={{ padding: "12px 16px", maxWidth: 200 }}>
+                                    <span style={{
+                                        fontSize: 13, color: "#6B7280", lineHeight: 1.5,
+                                        display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const,
+                                        overflow: "hidden", textOverflow: "ellipsis",
+                                    }}>
+                                        {s.description.split(/\s+/).slice(0, 10).join(" ")}
+                                        {s.description.split(/\s+/).length > 10 ? "..." : ""}
+                                    </span>
+                                </td>
                                 <td style={{ padding: "12px 16px", fontSize: 14, color: "#1E1E1E" }}>{s.programStudiName}</td>
-                                <td style={{ padding: "12px 16px", fontSize: 14, color: "#1E1E1E" }}>{s.membersCount}</td>
+                                {/* Anggota Tim - tampilkan nama + role */}
+                                <td style={{ padding: "12px 16px" }}>
+                                    {s.teamMembers.length === 0 ? (
+                                        <span style={{ fontSize: 13, color: "#8F8F8F", fontStyle: "italic" }}>Belum ada</span>
+                                    ) : (
+                                        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                                            {s.teamMembers.map((m, mi) => (
+                                                <div key={mi} style={{
+                                                    display: "inline-flex", alignItems: "center", gap: 6,
+                                                }}>
+                                                    <span style={{
+                                                        fontSize: 13, fontWeight: 500, color: "#1E1E1E",
+                                                        whiteSpace: "nowrap",
+                                                    }}>
+                                                        {m.name}
+                                                    </span>
+                                                    <span style={{
+                                                        fontSize: 10, fontWeight: 600, color: "#6B7280",
+                                                        background: "#F3F4F6", borderRadius: 4,
+                                                        padding: "2px 6px", whiteSpace: "nowrap",
+                                                    }}>
+                                                        {m.role}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </td>
                                 <td style={{ padding: "12px 16px", fontSize: 14, color: "#1E1E1E" }}>{s.productsCount}</td>
                                 <td style={{ padding: "12px 20px", textAlign: "center" }}>
                                     <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
@@ -634,6 +674,7 @@ export default function StartupManager({ startups, programStudis }: Props) {
                         ))}
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     );

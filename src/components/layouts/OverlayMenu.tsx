@@ -1,10 +1,48 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { OVERLAY_MENU, USER_NAV_LINKS } from "@/src/components/constants/navigation";
 import Link from "next/link";
 import { Search, X, ArrowRight } from "lucide-react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useDebounce } from "@/src/hooks/useDebounce";
 
 export default function OverlayMenu({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
+  const initialQuery = searchParams.get("q") || "";
+  const [searchTerm, setSearchTerm] = useState(initialQuery);
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+  useEffect(() => {
+     setSearchTerm(searchParams.get("q") || "");
+  }, [searchParams]);
+
+  useEffect(() => {
+      const currentParam = searchParams.get("q") || "";
+      if (debouncedSearchTerm !== currentParam && isOpen) {
+          const url = new URL("/produk", window.location.href);
+          
+          if (pathname === "/produk") {
+              searchParams.forEach((val, key) => {
+                  if (key !== "q" && key !== "page") url.searchParams.set(key, val);
+              });
+          }
+
+          if (debouncedSearchTerm) {
+              url.searchParams.set("q", debouncedSearchTerm);
+          } else {
+              url.searchParams.delete("q");
+          }
+          url.searchParams.delete("page");
+
+          router.push(url.pathname + url.search);
+          onClose(); // auto close on mobile after search
+      }
+  }, [debouncedSearchTerm, pathname, router, searchParams, isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
@@ -24,6 +62,8 @@ export default function OverlayMenu({ isOpen, onClose }: { isOpen: boolean; onCl
             <input
               type="text"
               placeholder="Cari startup atau produk..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full h-[52px] pl-5 pr-12 rounded-xl border border-[#C3C3C3] bg-[#F8F9FA] focus:outline-none focus:border-[#0062FF]"
             />
             <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8F8F8F]" size={20} />
