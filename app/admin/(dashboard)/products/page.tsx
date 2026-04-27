@@ -30,6 +30,7 @@ export default async function AdminProductsPage() {
                     price: Number(p.price),
                     stock: p.stock,
                     image: p.image,
+                    imageAlt: p.imageAlt,
                     ecommerceUrl: p.ecommerceUrl,
                     startupId: String(p.startupId),
                     categoryId: String(p.categoryId),
@@ -47,7 +48,7 @@ export default async function AdminProductsPage() {
                     { name: "startupId", label: "Startup", type: "select", options: startups.map(s => ({ value: String(s.id), label: s.name })), required: true },
                     { name: "categoryId", label: "Kategori", type: "select", options: categories.map(c => ({ value: String(c.id), label: c.name })), required: true },
                     { name: "ecommerceUrl", label: "Link E-commerce", type: "url", required: true },
-                    { name: "image", label: "Gambar Produk", type: "file", multiple: true },
+                    { name: "image", label: "Gambar Produk", type: "file", multiple: false, showAltField: true },
                 ]}
             />
         </div>

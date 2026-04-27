@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -19,7 +19,10 @@ interface TeamMemberData {
     name: string;
     role: string;
     photo: string;
+    photoAlt: string;
     instagramUrl: string;
+    programStudiId: number;
+    programStudiName?: string;
 }
 
 interface StartupData {
@@ -27,7 +30,11 @@ interface StartupData {
     name: string;
     description: string;
     bannerImage: string;
+    bannerAlt: string;
     profileImage: string;
+    profileAlt: string;
+    categoryId: number;
+    categoryName: string;
     programStudiId: number;
     programStudiName: string;
     membersCount: number;
@@ -38,6 +45,7 @@ interface StartupData {
 interface Props {
     startups: StartupData[];
     programStudis: { value: string; label: string }[];
+    categories: { value: string; label: string }[];
 }
 
 // ==================== HELPERS ====================
@@ -93,8 +101,10 @@ function ConfirmModal({ isOpen, title, message, confirmLabel, confirmColor, onCo
 
 // ==================== IMAGE UPLOAD BUTTON ====================
 
-function ImageUploadButton({ value, onChange, label }: {
+function ImageUploadButton({ value, onChange, label, altValue, onAltChange, showAlt = false, vertical = false }: {
     value: string; onChange: (val: string) => void; label: string;
+    altValue?: string; onAltChange?: (val: string) => void; showAlt?: boolean;
+    vertical?: boolean;
 }) {
     const inputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
@@ -124,30 +134,60 @@ function ImageUploadButton({ value, onChange, label }: {
     }, [onChange]);
 
     return (
-        <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, width: "100%" }}>
+            <div style={{ 
+                display: "flex", 
+                flexDirection: vertical ? "column" : "row", 
+                alignItems: vertical ? "stretch" : "flex-start", 
+                gap: 12 
+            }}>
                 {value ? (
-                    <div style={{ position: "relative" }}>
-                        <img src={value} alt="" style={{
-                            width: 64, height: 64, objectFit: "cover", borderRadius: 8, border: "1px solid #E5E7EB",
+                    <div style={{ position: "relative", flexShrink: 0, width: vertical ? "100%" : "fit-content" }}>
+                        <img src={value} alt={altValue || ""} style={{
+                            width: vertical ? "100%" : 64, 
+                            height: vertical ? 120 : 64, 
+                            objectFit: "cover", borderRadius: 8, border: "1px solid #E5E7EB",
                         }} />
-                        <button type="button" onClick={() => onChange("")} style={{
-                            position: "absolute", top: -6, right: -6, width: 18, height: 18,
+                        <button type="button" onClick={() => { onChange(""); onAltChange?.(""); }} style={{
+                            position: "absolute", top: -6, right: -6, width: 22, height: 22,
                             borderRadius: "50%", background: "#EF4444", border: "2px solid #fff",
-                            color: "#fff", fontSize: 9, cursor: "pointer", display: "flex",
+                            color: "#fff", fontSize: 10, cursor: "pointer", display: "flex",
                             alignItems: "center", justifyContent: "center", padding: 0,
-                        }}><X size={9} /></button>
+                            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                        }}><X size={12} /></button>
                     </div>
                 ) : (
                     <button type="button" onClick={() => inputRef.current?.click()} style={{
-                        width: 64, height: 64, borderRadius: 8, border: "2px dashed #C3C3C3",
+                        width: vertical ? "100%" : 64, 
+                        height: vertical ? 120 : 64, 
+                        borderRadius: 8, border: "2px dashed #C3C3C3",
                         background: "rgba(248,250,252,0.5)", cursor: "pointer",
                         display: "flex", flexDirection: "column" as const, alignItems: "center", justifyContent: "center",
-                        gap: 2, color: "#8F8F8F", fontSize: 10,
+                        gap: 2, color: "#8F8F8F", fontSize: 10, flexShrink: 0
                     }}>
-                        <Upload size={16} />
+                        <Upload size={vertical ? 24 : 16} />
                         {uploading ? "..." : label}
                     </button>
+                )}
+                
+                {showAlt && value && (
+                    <div style={{ flex: 1 }}>
+                        <label style={{ display: "block", color: "#8F8F8F", fontSize: 10, marginBottom: 4, fontWeight: 500 }}>
+                            Alt Text Gambar <span style={{ color: "#FF0000" }}>*</span>
+                        </label>
+                        <textarea
+                            placeholder="Deskripsikan gambar ini..."
+                            value={altValue || ""}
+                            onChange={(e) => onAltChange?.(e.target.value)}
+                            rows={vertical ? 2 : 3}
+                            style={{
+                                width: "100%", padding: "6px 10px", borderRadius: 6,
+                                border: "1px solid #C3C3C3", background: "#FFFFFF",
+                                color: "#1E1E1E", fontSize: 12, outline: "none",
+                                resize: "none"
+                            }}
+                        />
+                    </div>
                 )}
             </div>
             <input ref={inputRef} type="file" accept=".png,.jpg,.jpeg,.svg"
@@ -159,7 +199,7 @@ function ImageUploadButton({ value, onChange, label }: {
 
 // ==================== MAIN COMPONENT ====================
 
-export default function StartupManager({ startups, programStudis }: Props) {
+export default function StartupManager({ startups, programStudis, categories }: Props) {
     const router = useRouter();
     const [showForm, setShowForm] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
@@ -169,12 +209,45 @@ export default function StartupManager({ startups, programStudis }: Props) {
     // Form fields
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
-    const [bannerImage, setBannerImage] = useState("");
-    const [profileImage, setProfileImage] = useState("");
+    const [categoryId, setCategoryId] = useState("");
     const [programStudiId, setProgramStudiId] = useState("");
+    const [bannerImage, setBannerImage] = useState("");
+    const [bannerAlt, setBannerAlt] = useState("");
+    const [profileImage, setProfileImage] = useState("");
+    const [profileAlt, setProfileAlt] = useState("");
     const [teamMembers, setTeamMembers] = useState<TeamMemberData[]>([
-        { name: "", role: "", photo: "", instagramUrl: "" }
+        { name: "", role: "", photo: "", photoAlt: "", instagramUrl: "", programStudiId: 0 }
     ]);
+
+    // Auto-save logic
+    const STORAGE_KEY = "admin_startup_form_cache";
+
+    useEffect(() => {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved && !editingId) { // Only load cache for new entry, not when editing
+            try {
+                const data = JSON.parse(saved);
+                setName(data.name || "");
+                setDescription(data.description || "");
+                setBannerImage(data.bannerImage || "");
+                setProfileImage(data.profileImage || "");
+                setCategoryId(data.categoryId || "");
+                setTeamMembers(data.teamMembers || [{ name: "", role: "", photo: "", instagramUrl: "", programStudiId: 0 }]);
+                setShowForm(true);
+            } catch (e) {
+                console.error("Failed to load startup cache", e);
+            }
+        }
+    }, [editingId]);
+
+    useEffect(() => {
+        if (!editingId && (name || description || bannerImage || profileImage || categoryId || teamMembers.some(m => m.name || m.role))) {
+            const data = { name, description, bannerImage, profileImage, categoryId, teamMembers };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        } else if (!editingId) {
+            localStorage.removeItem(STORAGE_KEY);
+        }
+    }, [name, description, bannerImage, profileImage, categoryId, teamMembers, editingId]);
 
     // Confirmation
     const [confirmModal, setConfirmModal] = useState<{
@@ -189,14 +262,17 @@ export default function StartupManager({ startups, programStudis }: Props) {
     };
 
     function resetForm() {
-        setName(""); setDescription(""); setBannerImage(""); setProfileImage("");
+        setName(""); setDescription(""); 
+        setBannerImage(""); setBannerAlt("");
+        setProfileImage(""); setProfileAlt("");
+        setCategoryId("");
         setProgramStudiId("");
-        setTeamMembers([{ name: "", role: "", photo: "", instagramUrl: "" }]);
+        setTeamMembers([{ name: "", role: "", photo: "", photoAlt: "", instagramUrl: "", programStudiId: 0 }]);
         setError("");
     }
 
     function addTeamMember() {
-        setTeamMembers([...teamMembers, { name: "", role: "", photo: "", instagramUrl: "" }]);
+        setTeamMembers([...teamMembers, { name: "", role: "", photo: "", photoAlt: "", instagramUrl: "", programStudiId: 0 }]);
     }
 
     function removeTeamMember(index: number) {
@@ -204,7 +280,7 @@ export default function StartupManager({ startups, programStudis }: Props) {
         setTeamMembers(teamMembers.filter((_, i) => i !== index));
     }
 
-    function updateTeamMember(index: number, field: keyof TeamMemberData, value: string) {
+    function updateTeamMember(index: number, field: keyof TeamMemberData, value: string | number) {
         setTeamMembers(prev => prev.map((m, i) =>
             i === index ? { ...m, [field]: value } : m
         ));
@@ -212,14 +288,27 @@ export default function StartupManager({ startups, programStudis }: Props) {
 
     function startEditing(s: StartupData) {
         setEditingId(s.id);
-        setShowForm(false);
+        setShowForm(true);
         setName(s.name);
         setDescription(s.description);
         setBannerImage(s.bannerImage);
+        setBannerAlt(s.bannerAlt || "");
         setProfileImage(s.profileImage);
+        setProfileAlt(s.profileAlt || "");
+        setCategoryId(String(s.categoryId));
         setProgramStudiId(String(s.programStudiId));
-        setTeamMembers(s.teamMembers.length > 0 ? s.teamMembers : [{ name: "", role: "", photo: "", instagramUrl: "" }]);
+        setTeamMembers(s.teamMembers.length > 0 ? s.teamMembers.map(m => ({
+            id: m.id,
+            name: m.name,
+            role: m.role,
+            photo: m.photo,
+            photoAlt: m.photoAlt,
+            instagramUrl: m.instagramUrl || "",
+            programStudiId: m.programStudiId,
+            programStudiName: m.programStudiName,
+        })) : [{ name: "", role: "", photo: "", photoAlt: "", instagramUrl: "", programStudiId: 0 }]);
         setError("");
+        window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     // Validate
@@ -227,17 +316,22 @@ export default function StartupManager({ startups, programStudis }: Props) {
         const errors: string[] = [];
         if (!name.trim()) errors.push("Nama startup wajib diisi");
         if (!description.trim()) errors.push("Deskripsi wajib diisi");
+        if (bannerImage && !bannerAlt.trim()) errors.push("Alt text banner wajib diisi");
+        if (profileImage && !profileAlt.trim()) errors.push("Alt text profil wajib diisi");
+        if (!categoryId) errors.push("Kategori Produk wajib dipilih");
         if (!programStudiId) errors.push("Program Studi wajib dipilih");
         if (teamMembers.length < 1) errors.push("Minimal harus ada 1 anggota tim");
 
-        const validMembers = teamMembers.filter(m => m.name.trim() || m.role.trim());
-        if (validMembers.length < 1) errors.push("Minimal harus ada 1 anggota tim yang diisi nama dan perannya");
+        const filledMembers = teamMembers.filter(m => m.name.trim() || m.role.trim() || m.programStudiId > 0);
+        if (filledMembers.length < 1) errors.push("Minimal harus ada 1 anggota tim yang diisi");
 
         for (let i = 0; i < teamMembers.length; i++) {
             const m = teamMembers[i];
-            if (m.name.trim() || m.role.trim()) {
+            if (m.name.trim() || m.role.trim() || m.programStudiId > 0) {
                 if (!m.name.trim()) errors.push(`Nama anggota tim ke-${i + 1} wajib diisi`);
                 if (!m.role.trim()) errors.push(`Peran anggota tim ke-${i + 1} wajib diisi`);
+                if (m.photo && !m.photoAlt.trim()) errors.push(`Alt text foto anggota tim ke-${i + 1} wajib diisi`);
+                if (!m.programStudiId) errors.push(`Program Studi anggota tim ke-${i + 1} wajib dipilih`);
             }
         }
         return errors;
@@ -266,10 +360,13 @@ export default function StartupManager({ startups, programStudis }: Props) {
                     formData.set("name", name.trim());
                     formData.set("description", description.trim());
                     formData.set("bannerImage", bannerImage);
+                    formData.set("bannerAlt", bannerAlt.trim());
                     formData.set("profileImage", profileImage);
+                    formData.set("profileAlt", profileAlt.trim());
+                    formData.set("categoryId", categoryId);
                     formData.set("programStudiId", programStudiId);
 
-                    const validMembers = teamMembers.filter(m => m.name.trim() && m.role.trim());
+                    const validMembers = teamMembers.filter(m => m.name.trim() && m.role.trim() && m.programStudiId > 0);
                     formData.set("teamMembers", JSON.stringify(validMembers));
 
                     let result;
@@ -282,6 +379,7 @@ export default function StartupManager({ startups, programStudis }: Props) {
                     if (result && typeof result === "object" && "error" in result) {
                         setError((result as { error: string }).error);
                     } else {
+                        localStorage.removeItem(STORAGE_KEY);
                         resetForm();
                         setShowForm(false);
                         setEditingId(null);
@@ -343,6 +441,10 @@ export default function StartupManager({ startups, programStudis }: Props) {
             setError("Nama dan peran anggota wajib diisi");
             return;
         }
+        if (memberData.photo && !memberData.photoAlt.trim()) {
+            setError("Alt text foto anggota wajib diisi");
+            return;
+        }
         setLoading(true);
         setError("");
         try {
@@ -351,6 +453,7 @@ export default function StartupManager({ startups, programStudis }: Props) {
             formData.set("name", memberData.name.trim());
             formData.set("role", memberData.role.trim());
             formData.set("photo", memberData.photo);
+            formData.set("photoAlt", memberData.photoAlt.trim());
             formData.set("instagramUrl", memberData.instagramUrl);
             formData.set("startupId", String(startupId));
             await createTeamMember(formData);
@@ -378,8 +481,9 @@ export default function StartupManager({ startups, programStudis }: Props) {
 
             {/* Add Button */}
             <button
-                onClick={() => {
-                    if (showForm) { setShowForm(false); resetForm(); }
+                onClick={(e) => {
+                    e.preventDefault();
+                    if (showForm) { setShowForm(false); resetForm(); localStorage.removeItem(STORAGE_KEY); }
                     else { setShowForm(true); setEditingId(null); resetForm(); }
                 }}
                 style={{
@@ -415,101 +519,146 @@ export default function StartupManager({ startups, programStudis }: Props) {
                         {editingId ? "Edit Startup" : "Tambah Startup Baru"}
                     </h3>
 
-                    {/* Startup Info + Images in flex layout */}
-                    <div style={{ display: "flex", gap: 24 }}>
+                    {/* Startup Info Section */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: 32 }}>
                         {/* Left: Text fields */}
-                        <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, alignContent: "start" }}>
-                            <div>
-                                <label style={{ display: "block", color: "#8F8F8F", fontSize: 12, marginBottom: 6, fontWeight: 500 }}>
-                                    Nama Startup <span style={{ color: "#FF0000" }}>*</span>
-                                </label>
-                                <input value={name} placeholder="Masukan Nama StartUpmu..." onChange={(e) => setName(e.target.value)} style={inputStyle} />
+                        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                                <div style={{ gridColumn: "1 / -1" }}>
+                                    <label style={{ display: "block", color: "#8F8F8F", fontSize: 12, marginBottom: 6, fontWeight: 500 }}>
+                                        Nama Startup <span style={{ color: "#FF0000" }}>*</span>
+                                    </label>
+                                    <input value={name} placeholder="Masukan Nama StartUpmu..." onChange={(e) => setName(e.target.value)} style={inputStyle} />
+                                </div>
+                                <div>
+                                    <label style={{ display: "block", color: "#8F8F8F", fontSize: 12, marginBottom: 6, fontWeight: 500 }}>
+                                        Kategori Produk <span style={{ color: "#FF0000" }}>*</span>
+                                    </label>
+                                    <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} style={inputStyle}>
+                                        <option value="">Pilih Kategori</option>
+                                        {categories.map(c => (
+                                            <option key={c.value} value={c.value}>{c.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style={{ display: "block", color: "#8F8F8F", fontSize: 12, marginBottom: 6, fontWeight: 500 }}>
+                                        Program Studi <span style={{ color: "#FF0000" }}>*</span>
+                                    </label>
+                                    <select value={programStudiId} onChange={(e) => setProgramStudiId(e.target.value)} style={inputStyle}>
+                                        <option value="">Pilih Program Studi</option>
+                                        {programStudis.map(p => (
+                                            <option key={p.value} value={p.value}>{p.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
                             <div>
-                                <label style={{ display: "block", color: "#8F8F8F", fontSize: 12, marginBottom: 6, fontWeight: 500 }}>
-                                    Program Studi <span style={{ color: "#FF0000" }}>*</span>
-                                </label>
-                                <select value={programStudiId} onChange={(e) => setProgramStudiId(e.target.value)} style={inputStyle}>
-                                    <option value="">Pilih Program Studi</option>
-                                    {programStudis.map(p => (
-                                        <option key={p.value} value={p.value}>{p.label}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div style={{ gridColumn: "1 / -1" }}>
                                 <label style={{ display: "block", color: "#8F8F8F", fontSize: 12, marginBottom: 6, fontWeight: 500 }}>
                                     Deskripsi <span style={{ color: "#FF0000" }}>*</span>
                                 </label>
                                 <textarea value={description} placeholder="Masukan Deskripsi StartUpmu..." onChange={(e) => setDescription(e.target.value)}
-                                    rows={8} style={{ ...inputStyle, resize: "vertical" }} />
+                                    rows={6} style={{ ...inputStyle, resize: "vertical" }} />
                             </div>
                         </div>
 
                         {/* Right: Image upload */}
-                        <div style={{ width: 200, flexShrink: 0, display: "flex", flexDirection: "column", gap: 16 }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                             <div>
-                                <label style={{ display: "block", color: "#8F8F8F", fontSize: 12, marginBottom: 6, fontWeight: 500 }}>
+                                <label style={{ display: "block", color: "#8F8F8F", fontSize: 12, marginBottom: 8, fontWeight: 600 }}>
                                     Profile Image
                                 </label>
-                                <ImageUploadButton value={profileImage} onChange={setProfileImage} label="Profil" />
+                                <ImageUploadButton 
+                                    value={profileImage} 
+                                    onChange={setProfileImage} 
+                                    label="Upload Profil" 
+                                    showAlt={true}
+                                    altValue={profileAlt}
+                                    onAltChange={setProfileAlt}
+                                    vertical={true}
+                                />
                             </div>
                             <div>
-                                <label style={{ display: "block", color: "#8F8F8F", fontSize: 12, marginBottom: 6, fontWeight: 500 }}>
+                                <label style={{ display: "block", color: "#8F8F8F", fontSize: 12, marginBottom: 8, fontWeight: 600 }}>
                                     Banner Image
                                 </label>
-                                <ImageUploadButton value={bannerImage} onChange={setBannerImage} label="Banner" />
+                                <ImageUploadButton 
+                                    value={bannerImage} 
+                                    onChange={setBannerImage} 
+                                    label="Upload Banner" 
+                                    showAlt={true}
+                                    altValue={bannerAlt}
+                                    onAltChange={setBannerAlt}
+                                    vertical={true}
+                                />
                             </div>
                         </div>
                     </div>
 
                     {/* Team Members Section */}
-                    <div style={{ marginTop: 24, borderTop: "1px solid #E5E7EB", paddingTop: 20 }}>
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                <Users size={18} color="#0062FF" />
-                                <h4 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#1E1E1E" }}>
+                    <div style={{ marginTop: 32, borderTop: "1px solid #E5E7EB", paddingTop: 24 }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                <div style={{ 
+                                    width: 32, height: 32, borderRadius: 8, background: "rgba(0,98,255,0.08)",
+                                    display: "flex", alignItems: "center", justifyContent: "center"
+                                }}>
+                                    <Users size={18} color="#0062FF" />
+                                </div>
+                                <h4 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1E1E1E" }}>
                                     Anggota Tim <span style={{ color: "#FF0000" }}>*</span>
                                 </h4>
-                                <span style={{ fontSize: 12, color: "#8F8F8F" }}>(minimal 1 anggota)</span>
+                                <span style={{ fontSize: 12, color: "#8F8F8F", fontWeight: 400 }}>(minimal 1 anggota)</span>
                             </div>
                             <button type="button" onClick={addTeamMember} style={{
-                                padding: "6px 14px", borderRadius: 8, border: "1px solid rgba(0,98,255,0.2)",
-                                background: "rgba(0,98,255,0.06)", color: "#0062FF", fontSize: 12,
-                                fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 4,
+                                padding: "8px 16px", borderRadius: 10, border: "1px solid rgba(0,98,255,0.2)",
+                                background: "rgba(0,98,255,0.06)", color: "#0062FF", fontSize: 13,
+                                fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 6,
+                                transition: "all 0.2s"
                             }}>
-                                <UserPlus size={14} /> Tambah Anggota
+                                <UserPlus size={16} /> Tambah Anggota
                             </button>
                         </div>
 
-                        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16 }}>
                             {teamMembers.map((member, index) => (
                                 <div key={index} style={{
-                                    display: "flex", gap: 12, alignItems: "flex-start",
-                                    padding: 12, borderRadius: 10, background: "#F8FAFC", border: "1px solid #E5E7EB",
+                                    display: "grid", gridTemplateColumns: "180px 1fr auto", gap: 20,
+                                    padding: 20, borderRadius: 12, background: "#F9FAFB", border: "1px solid #E5E7EB",
+                                    position: "relative"
                                 }}>
-                                    <ImageUploadButton
-                                        value={member.photo}
-                                        onChange={(val) => updateTeamMember(index, "photo", val)}
-                                        label="Foto"
-                                    />
-                                    <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                                    <div style={{ width: 180 }}>
+                                        <label style={{ display: "block", color: "#8F8F8F", fontSize: 11, marginBottom: 6, fontWeight: 500 }}>
+                                            Foto Anggota
+                                        </label>
+                                        <ImageUploadButton
+                                            value={member.photo}
+                                            onChange={(val) => updateTeamMember(index, "photo", val)}
+                                            label="Upload Foto"
+                                            showAlt={true}
+                                            altValue={member.photoAlt}
+                                            onAltChange={(val) => updateTeamMember(index, "photoAlt", val)}
+                                            vertical={true}
+                                        />
+                                    </div>
+                                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                                         <div>
-                                            <label style={{ display: "block", color: "#8F8F8F", fontSize: 11, marginBottom: 4 }}>
-                                                Nama <span style={{ color: "#FF0000" }}>*</span>
+                                            <label style={{ display: "block", color: "#8F8F8F", fontSize: 11, marginBottom: 6, fontWeight: 500 }}>
+                                                Nama Lengkap <span style={{ color: "#FF0000" }}>*</span>
                                             </label>
                                             <input value={member.name}
-                                                placeholder="Masukan Nama Anggota Timmu..."
+                                                placeholder="Nama Anggota..."
                                                 onChange={(e) => updateTeamMember(index, "name", e.target.value)}
-                                                style={{ ...inputStyle, padding: "8px 12px", fontSize: 13 }} />
+                                                style={{ ...inputStyle, padding: "10px 14px", fontSize: 13 }} />
                                         </div>
                                         <div>
-                                            <label style={{ display: "block", color: "#8F8F8F", fontSize: 11, marginBottom: 4 }}>
-                                                Peran Anggota <span style={{ color: "#FF0000" }}>*</span>
+                                            <label style={{ display: "block", color: "#8F8F8F", fontSize: 11, marginBottom: 6, fontWeight: 500 }}>
+                                                Peran/Jabatan <span style={{ color: "#FF0000" }}>*</span>
                                             </label>
                                             <select
                                                 value={member.role}
                                                 onChange={(e) => updateTeamMember(index, "role", e.target.value)}
-                                                style={{ ...inputStyle, padding: "8px 12px", fontSize: 13 }}
+                                                style={{ ...inputStyle, padding: "10px 14px", fontSize: 13 }}
                                             >
                                                 <option value="">Pilih Peran</option>
                                                 <option value="Ketua">Ketua</option>
@@ -517,25 +666,44 @@ export default function StartupManager({ startups, programStudis }: Props) {
                                                 <option value="Member">Member</option>
                                             </select>
                                         </div>
-                                        <div style={{ gridColumn: "1 / -1" }}>
-                                            <label style={{ display: "block", color: "#8F8F8F", fontSize: 11, marginBottom: 4 }}>
-                                                Instagram URL
+                                        <div>
+                                            <label style={{ display: "block", color: "#8F8F8F", fontSize: 11, marginBottom: 6, fontWeight: 500 }}>
+                                                Program Studi <span style={{ color: "#FF0000" }}>*</span>
+                                            </label>
+                                            <select
+                                                value={member.programStudiId}
+                                                onChange={(e) => updateTeamMember(index, "programStudiId", parseInt(e.target.value))}
+                                                style={{ ...inputStyle, padding: "10px 14px", fontSize: 13 }}
+                                            >
+                                                <option value="0">Pilih Prodi</option>
+                                                {programStudis.map(p => (
+                                                    <option key={p.value} value={p.value}>{p.label}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label style={{ display: "block", color: "#8F8F8F", fontSize: 11, marginBottom: 6, fontWeight: 500 }}>
+                                                Link Instagram
                                             </label>
                                             <input value={member.instagramUrl}
                                                 onChange={(e) => updateTeamMember(index, "instagramUrl", e.target.value)}
-                                                placeholder="https://instagram.com/username"
-                                                style={{ ...inputStyle, padding: "8px 12px", fontSize: 13 }} />
+                                                placeholder="https://instagram.com/..."
+                                                style={{ ...inputStyle, padding: "10px 14px", fontSize: 13 }} />
                                         </div>
                                     </div>
-                                    {teamMembers.length > 1 && (
-                                        <button type="button" onClick={() => removeTeamMember(index)} style={{
-                                            padding: 6, borderRadius: 6, border: "1px solid rgba(239,68,68,0.2)",
-                                            background: "rgba(239,68,68,0.06)", color: "#EF4444",
-                                            cursor: "pointer", flexShrink: 0,
-                                        }}>
-                                            <X size={14} />
-                                        </button>
-                                    )}
+                                    
+                                    <div style={{ display: "flex", alignItems: "flex-start", paddingTop: 24 }}>
+                                        {teamMembers.length > 1 && (
+                                            <button type="button" onClick={() => removeTeamMember(index)} style={{
+                                                width: 32, height: 32, borderRadius: 8, border: "1px solid rgba(239,68,68,0.2)",
+                                                background: "rgba(239,68,68,0.06)", color: "#EF4444",
+                                                cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                                                transition: "all 0.2s"
+                                            }}>
+                                                <Trash2 size={16} />
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -575,8 +743,8 @@ export default function StartupManager({ startups, programStudis }: Props) {
                             <th style={{ textAlign: "left", padding: "14px 20px", fontSize: 12, color: "#8F8F8F", fontWeight: 600, width: 40 }}>#</th>
                             <th style={{ textAlign: "left", padding: "14px 16px", fontSize: 12, color: "#8F8F8F", fontWeight: 600, minWidth: 140 }}>Startup</th>
                             <th style={{ textAlign: "left", padding: "14px 16px", fontSize: 12, color: "#8F8F8F", fontWeight: 600, maxWidth: 200 }}>Deskripsi</th>
-                            <th style={{ textAlign: "left", padding: "14px 16px", fontSize: 12, color: "#8F8F8F", fontWeight: 600 }}>Program Studi</th>
-                            <th style={{ textAlign: "left", padding: "14px 16px", fontSize: 12, color: "#8F8F8F", fontWeight: 600, minWidth: 180 }}>Anggota Tim</th>
+                            <th style={{ textAlign: "left", padding: "14px 16px", fontSize: 12, color: "#8F8F8F", fontWeight: 600 }}>Kategori Produk</th>
+                            <th style={{ textAlign: "left", padding: "14px 16px", fontSize: 12, color: "#8F8F8F", fontWeight: 600, minWidth: 220 }}>Anggota Tim & Prodi</th>
                             <th style={{ textAlign: "left", padding: "14px 16px", fontSize: 12, color: "#8F8F8F", fontWeight: 600, width: 60 }}>Produk</th>
                             <th style={{ textAlign: "center", padding: "14px 20px", fontSize: 12, color: "#8F8F8F", fontWeight: 600, width: 130 }}>Aksi</th>
                         </tr>
@@ -620,32 +788,32 @@ export default function StartupManager({ startups, programStudis }: Props) {
                                         {s.description.split(/\s+/).length > 10 ? "..." : ""}
                                     </span>
                                 </td>
-                                <td style={{ padding: "12px 16px", fontSize: 14, color: "#1E1E1E" }}>{s.programStudiName}</td>
-                                {/* Anggota Tim - tampilkan nama + role */}
+                                <td style={{ padding: "12px 16px", fontSize: 14, color: "#1E1E1E" }}>
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                                        <span style={{ fontWeight: 500 }}>{s.categoryName}</span>
+                                        <span style={{ fontSize: 11, color: "#8F8F8F" }}>{s.programStudiName}</span>
+                                    </div>
+                                </td>
+                                {/* Anggota Tim - tampilkan nama + role + prodi */}
                                 <td style={{ padding: "12px 16px" }}>
                                     {s.teamMembers.length === 0 ? (
                                         <span style={{ fontSize: 13, color: "#8F8F8F", fontStyle: "italic" }}>Belum ada</span>
                                     ) : (
                                         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                                            {s.teamMembers.map((m, mi) => (
+                                            {s.teamMembers.slice(0, 2).map((m, mi) => (
                                                 <div key={mi} style={{
-                                                    display: "inline-flex", alignItems: "center", gap: 6,
+                                                    fontSize: 12, padding: "4px 8px", background: "#F8FAFC", 
+                                                    borderRadius: 6, border: "1px solid #F1F5F9", color: "#1E1E1E"
                                                 }}>
-                                                    <span style={{
-                                                        fontSize: 13, fontWeight: 500, color: "#1E1E1E",
-                                                        whiteSpace: "nowrap",
-                                                    }}>
-                                                        {m.name}
-                                                    </span>
-                                                    <span style={{
-                                                        fontSize: 10, fontWeight: 600, color: "#6B7280",
-                                                        background: "#F3F4F6", borderRadius: 4,
-                                                        padding: "2px 6px", whiteSpace: "nowrap",
-                                                    }}>
-                                                        {m.role}
-                                                    </span>
+                                                    <span style={{ fontWeight: 600 }}>{m.name}</span>
+                                                    <span style={{ color: "#8F8F8F", marginLeft: 4 }}>({m.role})</span>
                                                 </div>
                                             ))}
+                                            {s.teamMembers.length > 2 && (
+                                                <span style={{ fontSize: 11, color: "#0062FF", marginLeft: 8, fontWeight: 500 }}>
+                                                    +{s.teamMembers.length - 2} anggota lainnya
+                                                </span>
+                                            )}
                                         </div>
                                     )}
                                 </td>

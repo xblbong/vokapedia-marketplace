@@ -11,6 +11,7 @@ interface ProductProps {
 }
 
 export default function ProductCard({ product }: { product: ProductProps }) {
+    const primaryImage = product.image.split(",").map(s => s.trim()).find(Boolean) || "/images/svg/product1.svg";
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat("id-ID", {
             style: "currency",
@@ -24,7 +25,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
 
             <div className="w-full h-[160px] md:h-[179px] relative rounded-[12px] md:rounded-[15px] overflow-hidden">
                 <Image
-                    src={product.image}
+                    src={primaryImage}
                     alt={product.title}
                     fill
                     className="object-cover"

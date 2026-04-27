@@ -66,7 +66,7 @@ export default async function ProductDetailPage({
         logoUrl: rawProduct.startup.profileImage || "/images/svg/pp-akun.svg",
         productCount: rawProduct.startup._count.products,
         category: rawProduct.category?.name || "Lainnya",
-        studyProgram: rawProduct.startup.programStudi.name,
+        studyProgram: rawProduct.startup.programStudi?.name ?? "Program Studi Lainnya",
         hasEcommerce: rawProduct.ecommerceUrl !== "",
         hasWhatsapp: false
     };

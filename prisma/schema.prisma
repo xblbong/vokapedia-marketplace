@@ -1,22 +1,9 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/app/generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
-}
-
-// ==================== ENUMS ====================
-
-enum Role {
-  ADMINISTRATOR
-  SUPERVISOR
-}
-
-enum ButtonType {
-  WHATSAPP
-  ECOMMERCE
+  provider = "sqlite"
 }
 
 // ==================== USER & AUTH ====================
@@ -26,7 +13,7 @@ model User {
   name      String
   email     String   @unique
   password  String
-  role      Role     @default(SUPERVISOR)
+  role      String   @default("SUPERVISOR") // ADMINISTRATOR, SUPERVISOR
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -34,10 +21,12 @@ model User {
 // ==================== CORE DATA ====================
 
 model ProgramStudi {
-  id          Int       @id @default(autoincrement())
-  name        String    @unique
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
   description String
   icon        String
+  iconAlt     String       @default("")
+  teamMembers TeamMember[]
   startups    Startup[]
 }
 
@@ -47,12 +36,18 @@ model Startup {
   slug           String       @unique
   description    String
   bannerImage    String       @default("")
+  bannerAlt      String       @default("")
   profileImage   String       @default("")
-  programStudiId Int
+  profileAlt     String       @default("")
+  categoryId     Int?
+  programStudiId Int?
+  whatsappUrl    String?
+  ecommerceUrl   String?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
-  programStudi   ProgramStudi @relation(fields: [programStudiId], references: [id])
+  category       Category?    @relation(fields: [categoryId], references: [id])
+  programStudi   ProgramStudi? @relation(fields: [programStudiId], references: [id])
   teamMembers    TeamMember[]
   products       Product[]
   views          StartupView[]
@@ -60,29 +55,34 @@ model Startup {
 }
 
 model TeamMember {
-  id           Int     @id @default(autoincrement())
-  name         String
-  role         String
-  photo        String  @default("")
-  instagramUrl String? // Optional Instagram link
-  startupId    Int
+  id             Int          @id @default(autoincrement())
+  name           String
+  role           String
+  photo          String       @default("")
+  photoAlt       String       @default("")
+  instagramUrl   String?      // Optional Instagram link
+  startupId      Int
+  programStudiId Int?
 
-  startup      Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  startup        Startup      @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  programStudi   ProgramStudi? @relation(fields: [programStudiId], references: [id])
 }
 
 model Category {
   id       Int       @id @default(autoincrement())
   name     String    @unique
   products Product[]
+  startups Startup[]
 }
 
 model Product {
   id          Int      @id @default(autoincrement())
   title       String
   description String   @default("")
-  price       Decimal  @default(0)
+  price       Float    @default(0)
   stock       Int      @default(0)
   image       String   @default("")
+  imageAlt    String   @default("")
   startupId   Int
   categoryId  Int
   ecommerceUrl String  @default("")
@@ -123,7 +123,7 @@ model StartupView {
 
 model ButtonClick {
   id        Int        @id @default(autoincrement())
-  type      ButtonType
+  type      String     // WHATSAPP, ECOMMERCE
   productId Int?
   startupId Int?
   createdAt DateTime   @default(now())
@@ -140,26 +140,16 @@ model KategoriBerita {
   berita   Berita[]
 }
 
-enum SectionType {
-  TERBARU
-  PROGRAM
-  TEACHING_FACTORY
-}
-
-enum BeritaStatus {
-  DRAFT
-  PUBLISHED
-}
-
 model Berita {
   id              Int            @id @default(autoincrement())
   slug            String         @unique
   judul           String
   isi_berita      String
   gambar          String         @default("")
+  gambarAlt       String         @default("")
   is_slider       Boolean        @default(false)
-  section_type    SectionType    @default(TERBARU)
-  status          BeritaStatus   @default(PUBLISHED)
+  section_type    String         @default("TERBARU") // TERBARU, PROGRAM, TEACHING_FACTORY
+  status          String         @default("PUBLISHED") // DRAFT, PUBLISHED
   tags            String         @default("")
   kategoriId      Int
   createdAt       DateTime       @default(now())

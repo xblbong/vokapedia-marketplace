@@ -30,7 +30,7 @@ export default async function page({
   const startups = rawStartups.map(s => ({
     id: s.id.toString(),
     name: s.name,
-    department: s.programStudi.name,
+    department: s.programStudi?.name ?? "Program Studi Lainnya",
     description: s.description,
     teamPhotos: s.teamMembers.map(m => m.photo || "/images/svg/pp-akun.svg")
   }));

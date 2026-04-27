@@ -13,10 +13,10 @@ export default async function AdminCategoriesPage() {
     return (
         <div>
             <div className="flex items-center gap-2.5 mb-6">
-                <div className="w-9 h-9 rounded-[10px] bg-[rgba(0,98,255,0.08)] flex items-center justify-center">
-                    <Tag size={20} color="#0062FF" strokeWidth={2} />
+                <div className="w-9 h-9 rounded-[10px] bg-blue-50 flex items-center justify-center">
+                    <Tag size={20} className="text-brand-blue" strokeWidth={2} />
                 </div>
-                <h1 className="text-[28px] font-bold text-[var(--color-main-text)]">Kelola Kategori</h1>
+                <h1 className="text-2xl md:text-[28px] font-bold text-main-text">Kelola Kategori</h1>
             </div>
             <AdminCrudTable
                 type="category"

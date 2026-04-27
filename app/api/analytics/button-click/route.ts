@@ -1,6 +1,5 @@
 import { prisma } from "@/src/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
-import { ButtonType } from "@/src/app/generated/prisma";
 
 export async function POST(req: NextRequest) {
     try {
@@ -12,7 +11,7 @@ export async function POST(req: NextRequest) {
 
         await prisma.buttonClick.create({
             data: {
-                type: type as ButtonType,
+                type: type as string,
                 productId: productId ? parseInt(productId) : null,
                 startupId: startupId ? parseInt(startupId) : null,
             },

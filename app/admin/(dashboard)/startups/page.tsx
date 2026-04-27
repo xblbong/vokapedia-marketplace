@@ -8,13 +8,17 @@ export default async function AdminStartupsPage() {
 
     const startups = await prisma.startup.findMany({
         include: {
+            category: { select: { name: true } },
             programStudi: { select: { name: true } },
-            teamMembers: true,
+            teamMembers: {
+                include: { programStudi: { select: { name: true } } }
+            },
             _count: { select: { teamMembers: true, products: true } },
         },
         orderBy: { createdAt: "desc" },
     });
     const programStudis = await prisma.programStudi.findMany({ select: { id: true, name: true } });
+    const categories = await prisma.category.findMany({ select: { id: true, name: true } });
 
     return (
         <div>
@@ -31,8 +35,10 @@ export default async function AdminStartupsPage() {
                     description: s.description,
                     bannerImage: s.bannerImage,
                     profileImage: s.profileImage,
-                    programStudiId: s.programStudiId,
-                    programStudiName: s.programStudi.name,
+                    categoryId: s.categoryId || 0,
+                    categoryName: s.category?.name || "Tanpa Kategori",
+                    programStudiId: s.programStudiId || 0,
+                    programStudiName: s.programStudi?.name || "Tanpa Prodi",
                     membersCount: s._count.teamMembers,
                     productsCount: s._count.products,
                     teamMembers: s.teamMembers.map(m => ({
@@ -41,9 +47,12 @@ export default async function AdminStartupsPage() {
                         role: m.role,
                         photo: m.photo,
                         instagramUrl: m.instagramUrl || "",
+                        programStudiId: m.programStudiId || 0,
+                        programStudiName: m.programStudi?.name || "Tanpa Prodi",
                     })),
                 }))}
                 programStudis={programStudis.map(p => ({ value: String(p.id), label: p.name }))}
+                categories={categories.map(c => ({ value: String(c.id), label: c.name }))}
             />
         </div>
     );

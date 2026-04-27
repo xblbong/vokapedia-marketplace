@@ -1,6 +1,6 @@
 "use server";
 
-import { Prisma } from "@/src/app/generated/prisma";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/src/lib/prisma";
 import { requireAuth, requireAdmin, hashPassword } from "@/src/lib/auth";
 import { revalidatePath } from "next/cache";
@@ -34,6 +34,7 @@ export async function createProduct(formData: FormData) {
     const priceRaw = (formData.get("price") as string || "0");
     const stockRaw = (formData.get("stock") as string || "0");
     const image = (formData.get("image") as string || "");
+    const imageAlt = (formData.get("imageAlt") as string || "").trim();
     const ecommerceUrlRaw = (formData.get("ecommerceUrl") as string || "").trim();
     const startupId = parseInt(formData.get("startupId") as string);
     const categoryId = parseInt(formData.get("categoryId") as string);
@@ -42,6 +43,7 @@ export async function createProduct(formData: FormData) {
     const errors: string[] = [];
     if (!title) errors.push("Nama produk wajib diisi");
     if (countWords(description) < 10) errors.push("Deskripsi produk minimal 10 kata");
+    if (image && !imageAlt) errors.push("Alt text gambar wajib diisi");
     const price = parseRupiah(priceRaw);
     if (price <= 0) errors.push("Harga harus lebih dari 0");
     const stock = Number(stockRaw) || 0;
@@ -69,6 +71,7 @@ export async function createProduct(formData: FormData) {
         price: Number(price),
         stock: Number(stock),
         image,
+        imageAlt,
         ecommerceUrl: ecommerceUrlRaw,
         startupId: Number(startupId),
         categoryId: Number(categoryId),
@@ -116,6 +119,7 @@ export async function updateProduct(id: number, formData: FormData) {
     const priceRaw = (formData.get("price") as string || "0");
     const stockRaw = (formData.get("stock") as string || "0");
     const image = (formData.get("image") as string || "");
+    const imageAlt = (formData.get("imageAlt") as string || "").trim();
     const ecommerceUrlRaw = (formData.get("ecommerceUrl") as string || "").trim();
     const startupId = parseInt(formData.get("startupId") as string);
     const categoryId = parseInt(formData.get("categoryId") as string);
@@ -124,6 +128,7 @@ export async function updateProduct(id: number, formData: FormData) {
     const errors: string[] = [];
     if (!title) errors.push("Nama produk wajib diisi");
     if (countWords(description) < 10) errors.push("Deskripsi produk minimal 10 kata");
+    if (image && !imageAlt) errors.push("Alt text gambar wajib diisi");
     const price = parseRupiah(priceRaw);
     if (price <= 0) errors.push("Harga harus lebih dari 0");
     const stock = Number(stockRaw) || 0;
@@ -146,6 +151,7 @@ export async function updateProduct(id: number, formData: FormData) {
         price: Number(price),
         stock: Number(stock),
         image,
+        imageAlt,
         ecommerceUrl: ecommerceUrlRaw,
         startupId: Number(startupId),
         categoryId: Number(categoryId),
@@ -198,12 +204,15 @@ export async function createStartup(formData: FormData) {
     const name = (formData.get("name") as string || "").trim();
     const description = (formData.get("description") as string || "").trim();
     const bannerImage = formData.get("bannerImage") as string || "";
+    const bannerAlt = (formData.get("bannerAlt") as string || "").trim();
     const profileImage = formData.get("profileImage") as string || "";
+    const profileAlt = (formData.get("profileAlt") as string || "").trim();
+    const categoryId = parseInt(formData.get("categoryId") as string);
     const programStudiId = parseInt(formData.get("programStudiId") as string);
 
     // Team members from JSON
     const teamMembersJson = formData.get("teamMembers") as string || "[]";
-    let teamMembers: { name: string; role: string; photo: string; instagramUrl: string }[] = [];
+    let teamMembers: { name: string; role: string; photo: string; photoAlt: string; instagramUrl: string; programStudiId: number }[] = [];
     try {
         teamMembers = JSON.parse(teamMembersJson);
     } catch {
@@ -214,12 +223,17 @@ export async function createStartup(formData: FormData) {
     const errors: string[] = [];
     if (!name) errors.push("Nama startup wajib diisi");
     if (!description) errors.push("Deskripsi wajib diisi");
+    if (bannerImage && !bannerAlt) errors.push("Alt text banner wajib diisi");
+    if (profileImage && !profileAlt) errors.push("Alt text profil wajib diisi");
+    if (!categoryId || isNaN(categoryId)) errors.push("Kategori Produk wajib dipilih");
     if (!programStudiId || isNaN(programStudiId)) errors.push("Program Studi wajib dipilih");
     if (teamMembers.length < 1) errors.push("Minimal harus ada 1 anggota tim");
 
     for (let i = 0; i < teamMembers.length; i++) {
         if (!teamMembers[i].name?.trim()) errors.push(`Nama anggota tim ke-${i + 1} wajib diisi`);
         if (!teamMembers[i].role?.trim()) errors.push(`Peran anggota tim ke-${i + 1} wajib diisi`);
+        if (teamMembers[i].photo && !teamMembers[i].photoAlt) errors.push(`Alt text foto anggota tim ke-${i + 1} wajib diisi`);
+        if (!teamMembers[i].programStudiId) errors.push(`Program Studi anggota tim ke-${i + 1} wajib dipilih`);
     }
 
     if (errors.length > 0) return { error: errors.join(". ") };
@@ -232,14 +246,19 @@ export async function createStartup(formData: FormData) {
             slug,
             description,
             bannerImage,
+            bannerAlt,
             profileImage,
+            profileAlt,
+            categoryId,
             programStudiId,
             teamMembers: {
                 create: teamMembers.map((m) => ({
                     name: m.name.trim(),
                     role: m.role.trim(),
                     photo: m.photo || "",
+                    photoAlt: m.photoAlt || "",
                     instagramUrl: m.instagramUrl || null,
+                    programStudiId: Number(m.programStudiId),
                 })),
             },
         },
@@ -261,12 +280,15 @@ export async function updateStartup(id: number, formData: FormData) {
     const name = (formData.get("name") as string || "").trim();
     const description = (formData.get("description") as string || "").trim();
     const bannerImage = formData.get("bannerImage") as string || "";
+    const bannerAlt = (formData.get("bannerAlt") as string || "").trim();
     const profileImage = formData.get("profileImage") as string || "";
+    const profileAlt = (formData.get("profileAlt") as string || "").trim();
+    const categoryId = parseInt(formData.get("categoryId") as string);
     const programStudiId = parseInt(formData.get("programStudiId") as string);
 
     // Team members from JSON
     const teamMembersJson = formData.get("teamMembers") as string || "[]";
-    let teamMembers: { name: string; role: string; photo: string; instagramUrl: string }[] = [];
+    let teamMembers: { name: string; role: string; photo: string; photoAlt: string; instagramUrl: string; programStudiId: number }[] = [];
     try {
         teamMembers = JSON.parse(teamMembersJson);
     } catch {
@@ -276,12 +298,17 @@ export async function updateStartup(id: number, formData: FormData) {
     const errors: string[] = [];
     if (!name) errors.push("Nama startup wajib diisi");
     if (!description) errors.push("Deskripsi wajib diisi");
+    if (bannerImage && !bannerAlt) errors.push("Alt text banner wajib diisi");
+    if (profileImage && !profileAlt) errors.push("Alt text profil wajib diisi");
+    if (!categoryId || isNaN(categoryId)) errors.push("Kategori Produk wajib dipilih");
     if (!programStudiId || isNaN(programStudiId)) errors.push("Program Studi wajib dipilih");
     if (teamMembers.length < 1) errors.push("Minimal harus ada 1 anggota tim");
 
     for (let i = 0; i < teamMembers.length; i++) {
         if (!teamMembers[i].name?.trim()) errors.push(`Nama anggota tim ke-${i + 1} wajib diisi`);
         if (!teamMembers[i].role?.trim()) errors.push(`Peran anggota tim ke-${i + 1} wajib diisi`);
+        if (teamMembers[i].photo && !teamMembers[i].photoAlt) errors.push(`Alt text foto anggota tim ke-${i + 1} wajib diisi`);
+        if (!teamMembers[i].programStudiId) errors.push(`Program Studi anggota tim ke-${i + 1} wajib dipilih`);
     }
 
     if (errors.length > 0) return { error: errors.join(". ") };
@@ -297,7 +324,10 @@ export async function updateStartup(id: number, formData: FormData) {
                 slug,
                 description,
                 bannerImage,
+                bannerAlt,
                 profileImage,
+                profileAlt,
+                categoryId,
                 programStudiId,
             },
         });
@@ -309,7 +339,9 @@ export async function updateStartup(id: number, formData: FormData) {
                 name: m.name.trim(),
                 role: m.role.trim(),
                 photo: m.photo || "",
+                photoAlt: m.photoAlt || "",
                 instagramUrl: m.instagramUrl || null,
+                programStudiId: Number(m.programStudiId),
                 startupId: id,
             })),
         });
@@ -339,17 +371,19 @@ export async function createTeamMember(formData: FormData) {
     const name = (formData.get("name") as string || "").trim();
     const role = (formData.get("role") as string || "").trim();
     const photo = formData.get("photo") as string || "";
+    const photoAlt = (formData.get("photoAlt") as string || "").trim();
     const instagramUrl = (formData.get("instagramUrl") as string) || null;
     const startupId = parseInt(formData.get("startupId") as string);
 
     const errors: string[] = [];
     if (!name) errors.push("Nama anggota wajib diisi");
     if (!role) errors.push("Peran anggota wajib diisi");
+    if (photo && !photoAlt) errors.push("Alt text foto wajib diisi");
     if (!startupId || isNaN(startupId)) errors.push("Startup wajib dipilih");
     if (errors.length > 0) return { error: errors.join(". ") };
 
     await prisma.teamMember.create({
-        data: { name, role, photo, instagramUrl, startupId },
+        data: { name, role, photo, photoAlt, instagramUrl, startupId },
     });
 
     const result = { success: true };
@@ -378,7 +412,7 @@ export async function createCategory(formData: FormData) {
 
     // Unique check
     const existing = await prisma.category.findFirst({
-        where: { name: { equals: name, mode: "insensitive" } },
+        where: { name: { equals: name } },
     });
     if (existing) return { error: "Nama kategori sudah terdaftar." };
 
@@ -402,7 +436,7 @@ export async function updateCategory(id: number, formData: FormData) {
     // Unique check (exclude current)
     const existing = await prisma.category.findFirst({
         where: {
-            name: { equals: name, mode: "insensitive" },
+            name: { equals: name },
             id: { not: id },
         },
     });
@@ -433,10 +467,12 @@ export async function createProgramStudi(formData: FormData) {
     const name = (formData.get("name") as string || "").trim();
     const description = (formData.get("description") as string || "").trim();
     const icon = formData.get("icon") as string || "";
+    const iconAlt = (formData.get("iconAlt") as string || "").trim();
 
     if (!name) return { error: "Nama program studi wajib diisi" };
+    if (icon && !iconAlt) return { error: "Alt text icon wajib diisi" };
 
-    await prisma.programStudi.create({ data: { name, description, icon } });
+    await prisma.programStudi.create({ data: { name, description, icon, iconAlt } });
     const result = { success: true };
     storeIdempotency(idempotencyKey, result);
     revalidatePath("/admin/program-studi");
@@ -453,12 +489,14 @@ export async function updateProgramStudi(id: number, formData: FormData) {
     const name = (formData.get("name") as string || "").trim();
     const description = (formData.get("description") as string || "").trim();
     const icon = formData.get("icon") as string || "";
+    const iconAlt = (formData.get("iconAlt") as string || "").trim();
 
     if (!name) return { error: "Nama program studi wajib diisi" };
+    if (icon && !iconAlt) return { error: "Alt text icon wajib diisi" };
 
     await prisma.programStudi.update({
         where: { id },
-        data: { name, description, icon },
+        data: { name, description, icon, iconAlt },
     });
     const result = { success: true };
     storeIdempotency(idempotencyKey, result);
@@ -535,7 +573,7 @@ export async function createKategoriBerita(formData: FormData) {
     if (!name) return { error: "Nama kategori berita wajib diisi" };
 
     const existing = await prisma.kategoriBerita.findFirst({
-        where: { name: { equals: name, mode: "insensitive" } },
+        where: { name: { equals: name } },
     });
     if (existing) return { error: "Nama kategori berita sudah terdaftar." };
 
@@ -558,7 +596,7 @@ export async function updateKategoriBerita(id: number, formData: FormData) {
 
     const existing = await prisma.kategoriBerita.findFirst({
         where: {
-            name: { equals: name, mode: "insensitive" },
+            name: { equals: name },
             id: { not: id },
         },
     });
@@ -589,6 +627,7 @@ export async function createBerita(formData: FormData) {
     const judul = (formData.get("judul") as string || "").trim();
     const isi_berita = (formData.get("isi_berita") as string || "").trim();
     const gambar = (formData.get("gambar") as string || "");
+    const gambarAlt = (formData.get("gambarAlt") as string || "").trim();
     const kategoriId = parseInt(formData.get("kategoriId") as string);
     const section_typeRaw = (formData.get("section_type") as string || "TERBARU");
     const statusRaw = (formData.get("status") as string || "DRAFT");
@@ -597,6 +636,7 @@ export async function createBerita(formData: FormData) {
     const errors: string[] = [];
     if (!judul) errors.push("Ups! Judul berita belum diisi");
     if (!isi_berita) errors.push("Isi berita wajib diisi");
+    if (gambar && !gambarAlt) errors.push("Alt text gambar wajib diisi");
     if (!kategoriId || isNaN(kategoriId)) errors.push("Kategori berita wajib dipilih");
     if (errors.length > 0) return { error: errors.join(". ") };
 
@@ -615,6 +655,7 @@ export async function createBerita(formData: FormData) {
                 slug,
                 isi_berita,
                 gambar,
+                gambarAlt,
                 is_slider: isSliderVal,
                 section_type: section_type as "TERBARU" | "PROGRAM" | "TEACHING_FACTORY",
                 status: status as "DRAFT" | "PUBLISHED",
@@ -645,6 +686,7 @@ export async function updateBerita(id: number, formData: FormData) {
     const judul = (formData.get("judul") as string || "").trim();
     const isi_berita = (formData.get("isi_berita") as string || "").trim();
     const gambar = (formData.get("gambar") as string || "");
+    const gambarAlt = (formData.get("gambarAlt") as string || "").trim();
     const kategoriId = parseInt(formData.get("kategoriId") as string);
     const section_typeRaw = (formData.get("section_type") as string || "TERBARU");
     const statusRaw = (formData.get("status") as string || "DRAFT");
@@ -653,6 +695,7 @@ export async function updateBerita(id: number, formData: FormData) {
     const errors: string[] = [];
     if (!judul) errors.push("Ups! Judul berita belum diisi");
     if (!isi_berita) errors.push("Isi berita wajib diisi");
+    if (gambar && !gambarAlt) errors.push("Alt text gambar wajib diisi");
     if (!kategoriId || isNaN(kategoriId)) errors.push("Kategori berita wajib dipilih");
     if (errors.length > 0) return { error: errors.join(". ") };
 
@@ -673,6 +716,7 @@ export async function updateBerita(id: number, formData: FormData) {
                 slug,
                 isi_berita,
                 gambar,
+                gambarAlt,
                 is_slider: isSliderVal,
                 section_type: section_type as "TERBARU" | "PROGRAM" | "TEACHING_FACTORY",
                 status: status as "DRAFT" | "PUBLISHED",
@@ -711,8 +755,8 @@ export async function createHalaman(formData: FormData) {
     if (!title || !content) return { error: "Semua field wajib diisi" };
     if (!idempotencyKey) return { error: "Terjadi kesalahan sistem (no idempotency key)" };
 
-    const checked = checkIdempotency(idempotencyKey);
-    if (checked) return checked;
+    const { isDuplicate, cachedResult } = checkIdempotency(idempotencyKey);
+    if (isDuplicate) return cachedResult;
 
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
 
@@ -741,8 +785,8 @@ export async function updateHalaman(id: number, formData: FormData) {
     if (!title || !content) return { error: "Semua field wajib diisi" };
     if (!idempotencyKey) return { error: "Terjadi kesalahan sistem (no idempotency key)" };
 
-    const checked = checkIdempotency(idempotencyKey);
-    if (checked) return checked;
+    const { isDuplicate: isDupUpdate, cachedResult: cachedUpdate } = checkIdempotency(idempotencyKey);
+    if (isDupUpdate) return cachedUpdate;
 
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
 
@@ -783,8 +827,8 @@ export async function createMenuOverlayItem(formData: FormData) {
     if (!sectionName || !label || !url) return { error: "Semua field wajib diisi" };
     if (!idempotencyKey) return { error: "Terjadi kesalahan sistem (no idempotency key)" };
 
-    const checked = checkIdempotency(idempotencyKey);
-    if (checked) return checked;
+    const { isDuplicate: isDupMenu, cachedResult: cachedMenu } = checkIdempotency(idempotencyKey);
+    if (isDupMenu) return cachedMenu;
 
     const order = parseInt(orderStr) || 0;
 
@@ -813,8 +857,8 @@ export async function updateMenuOverlayItem(id: number, formData: FormData) {
     if (!sectionName || !label || !url) return { error: "Semua field wajib diisi" };
     if (!idempotencyKey) return { error: "Terjadi kesalahan sistem (no idempotency key)" };
 
-    const checked = checkIdempotency(idempotencyKey);
-    if (checked) return checked;
+    const { isDuplicate: isDupMenuUpd, cachedResult: cachedMenuUpd } = checkIdempotency(idempotencyKey);
+    if (isDupMenuUpd) return cachedMenuUpd;
 
     const order = parseInt(orderStr) || 0;
 

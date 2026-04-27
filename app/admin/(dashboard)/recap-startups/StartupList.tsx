@@ -157,7 +157,7 @@ export function StartupList({ startups }: StartupListProps) {
                                     color: "#8F8F8F",
                                 }}
                             >
-                                {s.programStudi.name}
+                                {s.programStudi?.name || "—"}
                             </p>
                             <p
                                 style={{

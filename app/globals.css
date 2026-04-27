@@ -21,7 +21,41 @@ body {
   color: var(--color-main-text);
   padding: 0;
   margin: 0;
+  /* Fix: mencegah text caret muncul di elemen non-input */
+  cursor: default;
 }
+
+/* Fix: Elemen teks non-interaktif tidak boleh menampilkan text caret */
+h1, h2, h3, h4, h5, h6,
+p, span, div, section, article, aside, header, footer, nav, main,
+label, li, ul, ol, blockquote, figcaption, caption, td, th {
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Fix: Hanya input yang boleh punya text cursor & selectable */
+input, textarea, select, [contenteditable="true"], [contenteditable] {
+  cursor: text;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* Fix: Link & tombol pakai pointer, bukan text caret */
+a, button, [role="button"] {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Fix: Konten artikel/berita (dangerouslySetInnerHTML) boleh diselect user */
+.prose p, .prose span, .prose li, .prose blockquote, .prose h1,
+.prose h2, .prose h3, .prose h4, .whitespace-pre-line {
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: auto;
+}
+
 
 /* layout container */
 .layout-container {

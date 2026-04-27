@@ -1,12 +1,6 @@
-import { PrismaClient } from "../src/app/generated/prisma";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { Pool } from "pg";
+import { prisma } from "../src/lib/prisma";
 import bcrypt from "bcryptjs";
 import "dotenv/config";
-
-const pool = new Pool({ connectionString: process.env.DIRECT_URL || process.env.DATABASE_URL! });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
 
 async function main() {
     console.log("🌱 Seeding database...");
@@ -63,9 +57,11 @@ async function main() {
             create: {
                 name: "Pop Ame",
                 slug: "pop-ame",
-                description: "Merupakan brand aksesori handmade asal Malang yang memproduksi keychain, pin, phone strap, dan aksesori kustom dari bahan daur ulang seperti mainan bekas, clay, dan shrink paper.",
-                bannerImage: "/images/png/bg-toko.png",
-                profileImage: "/images/svg/pp-akun.svg",
+                description: "Merupakan brand aksesori handmade asal Malang yang memproduksi keychain, pin, phone strap, dan aksesori kustom dari bahan daur ulang seperti mainan bekas, clay, dan shrink paper. Mengusung konsep upcycle, Pop Ame menghadirkan produk estetik dengan desain playful yang ramah lingkungan dan dapat dipersonalisasi. Dengan proses produksi handmade yang rapi dan cepat, Pop Ame menawarkan aksesori lokal yang unik, berkarakter, dan relevan dengan gaya Gen Z.",
+                bannerImage: "",
+                profileImage: "",
+                whatsappUrl: "+628123456789",
+                ecommerceUrl: "https://tokopedia.com/",
                 programStudiId: desainGrafis.id,
             },
         });
@@ -73,10 +69,10 @@ async function main() {
 
         // Team members
         const teamData = [
-            { name: "Raufa Insani Lutfi", role: "Desain Grafis", photo: "/images/png/a.png" },
-            { name: "Desviawan Rangga P", role: "Desain Grafis", photo: "/images/png/b.png" },
-            { name: "Azzahra Julia Rachma", role: "Desain Grafis", photo: "/images/png/c.png" },
-            { name: "Karinda Najla Shahira", role: "Desain Grafis", photo: "/images/png/d.png" },
+            { name: "Raufa Insani Lutfi", role: "Desain Grafis", photo: "", studyProgram: "Desain Grafis" },
+            { name: "Desviawan Rangga P", role: "Desain Grafis", photo: "", studyProgram: "Desain Grafis" },
+            { name: "Azzahra Julia Rachma", role: "Desain Grafis", photo: "", studyProgram: "Desain Grafis" },
+            { name: "Karinda Najla Shahira", role: "Desain Grafis", photo: "", studyProgram: "Desain Grafis" },
         ];
 
         for (const member of teamData) {
@@ -90,8 +86,8 @@ async function main() {
         const aksesori = await prisma.category.findUnique({ where: { name: "Aksesori" } });
         if (aksesori) {
             const productData = [
-                { title: "Keychain", description: "Aksesori handmade dari bahan daur ulang.", price: 17000, image: "/images/png/product3.png" },
-                { title: "PIN", description: "Aksesori handmade dari bahan daur ulang.", price: 17000, image: "/images/png/product3.png" },
+                { title: "Keychain", description: "Aksesori handmade dari bahan daur ulang.", price: 17000, image: "" },
+                { title: "PIN", description: "Aksesori handmade dari bahan daur ulang.", price: 17000, image: "" },
             ];
             for (const product of productData) {
                 await prisma.product.create({

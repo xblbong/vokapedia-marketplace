@@ -21,9 +21,9 @@ export default async function ProdukPage({
     
     if (q) {
         whereClause.OR = [
-            { title: { contains: q, mode: "insensitive" } },
-            { description: { contains: q, mode: "insensitive" } },
-            { startup: { name: { contains: q, mode: "insensitive" } } },
+            { title: { contains: q } },
+            { description: { contains: q } },
+            { startup: { name: { contains: q } } },
         ];
     }
     if (prodi) {
@@ -59,9 +59,9 @@ export default async function ProdukPage({
         prisma.product.findMany({
             where: q ? {
                 OR: [
-                    { title: { contains: q, mode: "insensitive" } },
-                    { description: { contains: q, mode: "insensitive" } },
-                    { startup: { name: { contains: q, mode: "insensitive" } } },
+                    { title: { contains: q } },
+                    { description: { contains: q } },
+                    { startup: { name: { contains: q } } },
                 ]
             } : {},
             include: {

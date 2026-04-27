@@ -86,7 +86,7 @@ export default async function RecapStartupDetailPage({
                         {startup.name}
                     </h1>
                     <p style={{ margin: "0 0 8px", fontSize: 14, color: "#0062FF", fontWeight: 500 }}>
-                        {startup.programStudi.name}
+                        {startup.programStudi?.name ?? "Program Studi Lainnya"}
                     </p>
                     <p style={{ margin: "0 0 16px", fontSize: 14, color: "#6B7280", lineHeight: 1.6 }}>
                         {startup.description || "Tidak ada deskripsi"}

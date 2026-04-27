@@ -26,7 +26,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const formattedStartup = {
     id: startup.id.toString(),
     name: startup.name,
-    category: startup.programStudi.name,
+    category: startup.programStudi?.name ?? "Program Studi Lainnya",
     bannerImage: startup.bannerImage || "/images/png/bg-toko.png",
     profileImage: startup.profileImage || "/images/svg/pp-akun.svg",
     description: startup.description,

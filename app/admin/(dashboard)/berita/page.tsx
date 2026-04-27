@@ -17,6 +17,7 @@ export default async function AdminBeritaPage() {
         slug: b.slug,
         isi_berita: b.isi_berita,
         gambar: b.gambar,
+        gambarAlt: b.gambarAlt,
         is_slider: b.is_slider ? "true" : "false",
         is_slider_label: b.is_slider ? "Ya" : "Tidak",
         section_type: b.section_type,
@@ -68,7 +69,7 @@ export default async function AdminBeritaPage() {
             ]
         },
         { name: "tags", label: "Tags (Pisahkan dengan koma)", type: "text", required: false },
-        { name: "gambar", label: "Gambar Cover / Thumbnail", type: "file", required: false, multiple: false },
+        { name: "gambar", label: "Gambar Cover / Thumbnail", type: "file", required: false, multiple: false, showAltField: true },
         { name: "isi_berita", label: "Isi Berita Lengkap", type: "textarea", required: true }
     ];
 

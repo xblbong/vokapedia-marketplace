@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil, Trash2, Plus, X, Check, Upload, AlertCircle, ImageIcon, ExternalLink } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
@@ -30,6 +30,7 @@ interface FormField {
     minLength?: number;
     minWords?: number;
     min?: number;
+    showAltField?: boolean; // New property to show alt text field for images
 }
 
 interface Props {
@@ -310,11 +311,15 @@ function FileUploadField({
     value,
     onChange,
     error,
+    allValues,
+    onValueChange,
 }: {
     field: FormField;
     value: string | string[];
     onChange: (val: string | string[]) => void;
     error?: string;
+    allValues?: Record<string, any>;
+    onValueChange?: (name: string, val: any) => void;
 }) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [previews, setPreviews] = useState<string[]>(
@@ -322,6 +327,12 @@ function FileUploadField({
     );
     const [uploadError, setUploadError] = useState("");
     const [uploading, setUploading] = useState(false);
+
+    // Derived alt field name
+    const altFieldName = field.name === "image" ? "imageAlt" : 
+                         field.name === "gambar" ? "gambarAlt" : 
+                         field.name === "icon" ? "iconAlt" : 
+                         `${field.name}Alt`;
 
     const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
@@ -421,33 +432,58 @@ function FileUploadField({
 
                 {/* Previews */}
                 {previews.length > 0 && (
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                        {previews.map((src, i) => (
-                            <div key={i} style={{ position: "relative" }}>
-                                <img
-                                    src={src}
-                                    alt={`Preview ${i + 1}`}
+                    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                            {previews.map((src, i) => (
+                                <div key={i} style={{ position: "relative" }}>
+                                    <img
+                                        src={src}
+                                        alt={`Preview ${i + 1}`}
+                                        style={{
+                                            width: 80, height: 80, objectFit: "cover",
+                                            borderRadius: 8, border: "1px solid #E5E7EB",
+                                        }}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => removePreview(i)}
+                                        style={{
+                                            position: "absolute", top: -6, right: -6,
+                                            width: 20, height: 20, borderRadius: "50%",
+                                            background: "#EF4444", border: "2px solid #fff",
+                                            color: "#fff", fontSize: 10, cursor: "pointer",
+                                            display: "flex", alignItems: "center", justifyContent: "center",
+                                            padding: 0,
+                                        }}
+                                    >
+                                        <X size={10} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Alt text field */}
+                        {field.showAltField && !field.multiple && (
+                            <div>
+                                <label style={{ display: "block", color: "#8F8F8F", fontSize: 11, marginBottom: 4 }}>
+                                    Alt Text Gambar <span style={{ color: "#FF0000" }}>*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="Contoh: Logo Vokapedia berwarna biru"
+                                    value={allValues?.[altFieldName] || ""}
+                                    onChange={(e) => onValueChange?.(altFieldName, e.target.value)}
                                     style={{
-                                        width: 80, height: 80, objectFit: "cover",
-                                        borderRadius: 8, border: "1px solid #E5E7EB",
+                                        width: "100%", padding: "8px 12px", borderRadius: 8,
+                                        border: "1px solid #C3C3C3", background: "#FFFFFF",
+                                        color: "#1E1E1E", fontSize: 13, outline: "none",
                                     }}
                                 />
-                                <button
-                                    type="button"
-                                    onClick={() => removePreview(i)}
-                                    style={{
-                                        position: "absolute", top: -6, right: -6,
-                                        width: 20, height: 20, borderRadius: "50%",
-                                        background: "#EF4444", border: "2px solid #fff",
-                                        color: "#fff", fontSize: 10, cursor: "pointer",
-                                        display: "flex", alignItems: "center", justifyContent: "center",
-                                        padding: 0,
-                                    }}
-                                >
-                                    <X size={10} />
-                                </button>
+                                <p style={{ color: "#C3C3C3", fontSize: 10, marginTop: 4 }}>
+                                    Deskripsikan gambar untuk aksesibilitas (pembaca layar).
+                                </p>
                             </div>
-                        ))}
+                        )}
                     </div>
                 )}
             </div>
@@ -482,6 +518,35 @@ export default function AdminCrudTable({ type, data, columns, columnLabels, form
     // Delete confirmation
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+
+    // Auto-save key based on type
+    const STORAGE_KEY = `admin_form_cache_${type}`;
+
+    // Load auto-saved data on mount
+    useEffect(() => {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                setFormValues(parsed);
+                // If there's data, show the form
+                if (Object.keys(parsed).length > 0) {
+                    setShowForm(true);
+                }
+            } catch (e) {
+                console.error("Failed to parse form cache", e);
+            }
+        }
+    }, [STORAGE_KEY]);
+
+    // Save formValues to localStorage when changed
+    useEffect(() => {
+        if (Object.keys(formValues).length > 0) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(formValues));
+        } else {
+            localStorage.removeItem(STORAGE_KEY);
+        }
+    }, [formValues, STORAGE_KEY]);
 
     const canCreate = type === "user" ? userRole === "ADMINISTRATOR" : true;
     const canEdit = type in updateActions;
@@ -559,6 +624,18 @@ export default function AdminCrudTable({ type, data, columns, columnLabels, form
                 }
             }
 
+            // Alt text validation for images
+            if (field.type === "file" && field.showAltField && strVal) {
+                const altFieldName = field.name === "image" ? "imageAlt" : 
+                                     field.name === "gambar" ? "gambarAlt" : 
+                                     field.name === "icon" ? "iconAlt" : 
+                                     `${field.name}Alt`;
+                const altVal = (values[altFieldName] || "").toString().trim();
+                if (!altVal) {
+                    errors[altFieldName] = `Alt text untuk ${field.label} wajib diisi`;
+                }
+            }
+
             if (field.type === "url" && strVal) {
                 try {
                     new URL(strVal);
@@ -605,6 +682,16 @@ export default function AdminCrudTable({ type, data, columns, columnLabels, form
                     } else {
                         formData.set(field.name, String(val));
                     }
+
+                    // Also include alt text field if present
+                    if (field.type === "file" && field.showAltField) {
+                        const altFieldName = field.name === "image" ? "imageAlt" : 
+                                             field.name === "gambar" ? "gambarAlt" : 
+                                             field.name === "icon" ? "iconAlt" : 
+                                             `${field.name}Alt`;
+                        const altVal = formValues[altFieldName] || "";
+                        formData.set(altFieldName, String(altVal));
+                    }
                 }
 
                 const result = await createActions[type](formData);
@@ -613,6 +700,7 @@ export default function AdminCrudTable({ type, data, columns, columnLabels, form
                 } else {
                     setShowForm(false);
                     setFormValues({});
+                    localStorage.removeItem(STORAGE_KEY);
                     setFieldErrors({});
                     router.refresh();
                 }
@@ -646,6 +734,16 @@ export default function AdminCrudTable({ type, data, columns, columnLabels, form
                         formData.set(field.name, val.join(","));
                     } else {
                         formData.set(field.name, String(val));
+                    }
+
+                    // Also include alt text field if present
+                    if (field.type === "file" && field.showAltField) {
+                        const altFieldName = field.name === "image" ? "imageAlt" : 
+                                             field.name === "gambar" ? "gambarAlt" : 
+                                             field.name === "icon" ? "iconAlt" : 
+                                             `${field.name}Alt`;
+                        const altVal = editValues[altFieldName] || "";
+                        formData.set(altFieldName, String(altVal));
                     }
                 }
 
@@ -696,6 +794,15 @@ export default function AdminCrudTable({ type, data, columns, columnLabels, form
             } else if (field.type === "file") {
                 const strVal = String(rawVal ?? "");
                 values[field.name] = strVal.includes(",") ? strVal.split(",") : strVal;
+
+                // Also populate alt text field if present
+                if (field.showAltField) {
+                    const altFieldName = field.name === "image" ? "imageAlt" : 
+                                         field.name === "gambar" ? "gambarAlt" : 
+                                         field.name === "icon" ? "iconAlt" : 
+                                         `${field.name}Alt`;
+                    values[altFieldName] = String(row[altFieldName] ?? "");
+                }
             } else {
                 values[field.name] = String(rawVal ?? "");
             }
@@ -831,6 +938,8 @@ export default function AdminCrudTable({ type, data, columns, columnLabels, form
                                         value={fieldValue}
                                         onChange={(val) => setFieldValue(field.name, val, isEdit)}
                                         error={fieldErrors[field.name]}
+                                        allValues={isEdit ? editValues : formValues}
+                                        onValueChange={(name, val) => setFieldValue(name, val, isEdit)}
                                     />
                                 </div>
                             );
@@ -907,7 +1016,8 @@ export default function AdminCrudTable({ type, data, columns, columnLabels, form
             {/* Add Button */}
             {canCreate && (
                 <button
-                    onClick={() => {
+                    onClick={(e) => {
+                        e.preventDefault();
                         setShowForm(!showForm);
                         setEditingId(null);
                         if (!showForm) {
